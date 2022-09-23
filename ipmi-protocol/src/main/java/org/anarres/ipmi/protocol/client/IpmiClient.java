@@ -4,17 +4,20 @@
  */
 package org.anarres.ipmi.protocol.client;
 
-import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.dispatch.IpmiPayloadTransmitQueue;
 import org.anarres.ipmi.protocol.client.session.IpmiSessionManager;
 import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+
+import java.io.IOException;
 
 /**
  *
  * @author shevek
  */
 public interface IpmiClient extends IpmiHandlerContext.IpmiPacketQueue, IpmiPayloadTransmitQueue.IpmiPacketSender {
+    public void start() throws IOException, InterruptedException;
 
-    @Nonnull
+    public void stop() throws IOException, InterruptedException;
+
     public IpmiSessionManager getSessionManager();
 }

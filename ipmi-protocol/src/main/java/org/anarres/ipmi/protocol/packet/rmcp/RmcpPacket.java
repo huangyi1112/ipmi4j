@@ -3,6 +3,7 @@ package org.anarres.ipmi.protocol.packet.rmcp;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
+import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
 
 /**
  * RMCP Packet.

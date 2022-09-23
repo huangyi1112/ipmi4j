@@ -11,14 +11,27 @@ import org.anarres.ipmi.protocol.client.session.IpmiSession;
 import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  *
  * @author shevek
  */
 public interface IpmiReceiver {
-
+    /**
+     * Receive response
+     */
     public void receive(@Nonnull IpmiHandlerContext context, @CheckForNull IpmiSession session, @Nonnull IpmiPayload response);
 
+    /**
+     * Timeout response
+     */
     public void timeout(@Nonnull IpmiReceiverKey key);
 
+    /**
+     * Wait till a response got or ...
+     * @param timeout
+     * @param unit
+     */
+    // public void await(long timeout, TimeUnit unit);
 }

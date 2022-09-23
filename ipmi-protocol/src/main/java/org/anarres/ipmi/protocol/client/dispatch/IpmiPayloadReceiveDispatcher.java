@@ -22,7 +22,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiCommand;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiResponse;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.AbstractTaggedIpmiPayload;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
-import org.anarres.ipmi.protocol.packet.rmcp.Packet;
+import org.anarres.ipmi.protocol.packet.common.Packet;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

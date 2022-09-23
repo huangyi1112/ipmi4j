@@ -1,13 +1,14 @@
-package org.anarres.ipmi.protocol.packet.rmcp;
+package org.anarres.ipmi.protocol.packet.common;
 
 import java.net.SocketAddress;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
 import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
-import org.anarres.ipmi.protocol.packet.common.Wireable;
+import org.anarres.ipmi.protocol.packet.rmcp.Encapsulation;
+import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
 
 /**
- *
+ * A packet to be sent or read from network (UDP packet)
  * @author shevek
  */
 public interface Packet extends Wireable, Encapsulation {

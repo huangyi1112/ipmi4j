@@ -2,6 +2,8 @@ package org.anarres.ipmi.protocol.packet.rmcp;
 
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
+
+import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
 import org.anarres.ipmi.protocol.packet.ipmi.security.impl.integrity.IntegrityPad;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 

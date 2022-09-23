@@ -21,7 +21,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiCommand;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.AbstractTaggedIpmiPayload;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
-import org.anarres.ipmi.protocol.packet.rmcp.Packet;
+import org.anarres.ipmi.protocol.packet.common.Packet;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
 
 /**
@@ -36,7 +36,7 @@ public class IpmiPayloadTransmitQueue implements IpmiHandlerContext.IpmiPacketQu
     }
 
     // -> Queue<QueueItem>
-    private static class Queue extends LinkedBlockingQueue<IpmiPayload> {
+    private static class Queue extends LinkedBlockingQueue<QueueItem> {
 
         // private final BitSet messageTags = new BitSet(256);
         /** @see AbstractTaggedIpmiPayload#getMessageTag() */
@@ -86,8 +86,10 @@ public class IpmiPayloadTransmitQueue implements IpmiHandlerContext.IpmiPacketQu
         protected void handleTagged(IpmiHandlerContext context, IpmiSession session, AbstractTaggedIpmiPayload message) {
             Queue queue = getState(context);
             synchronized (queue) {
-                message.setMessageTag((byte) queue.nextMessageTag++);
-                queue.add(message);
+                byte nextMessageTag = (byte) queue.nextMessageTag++;
+                message.setMessageTag(nextMessageTag);
+
+                _queue(queue, context, session, message, nextMessageTag);
             }
         }
 
@@ -97,13 +99,18 @@ public class IpmiPayloadTransmitQueue implements IpmiHandlerContext.IpmiPacketQu
             synchronized (queue) {
                 byte sequenceNumber = (byte) queue.nextSequenceNumber++;
                 message.setSequenceNumber(sequenceNumber);
-                // receiver.setReceiver(context, null, sequenceNumber, null);
-                queue.add(message);
+
+                _queue(queue, context, session, message, sequenceNumber);
             }
         }
     };
     private final IpmiReceiverRepository receiver;
     private final IpmiPacketSender sender;
+
+    //
+    // TODO: to avoid passing the receiver in the interfaces, so let's just create thread local to do this
+    private final ThreadLocal<IpmiReceiver> responseReceiver = new ThreadLocal<>();
+    private final ThreadLocal<Class<? extends IpmiPayload>> responseType = new ThreadLocal<>();
 
     public IpmiPayloadTransmitQueue(@Nonnull IpmiReceiverRepository receiver, @Nonnull IpmiPacketSender sender) {
         this.receiver = receiver;
@@ -117,8 +124,24 @@ public class IpmiPayloadTransmitQueue implements IpmiHandlerContext.IpmiPacketQu
 
     @Override
     public void queue(IpmiHandlerContext context, IpmiSession session, IpmiPayload message,
-            Class<? extends IpmiPayload> responseType, IpmiReceiver receiver) {
+            Class<? extends IpmiPayload> type, IpmiReceiver receiver) {
+        // todo: set message receiver, it will be used in the message handlers ...
+        responseReceiver.set(receiver);
+        responseType.set(type);
+
         message.apply(ipmiPayloadSequencer, context, session);
+    }
+
+    /**
+     * Queue a message into given queue
+     */
+    private void _queue(Queue queue, IpmiHandlerContext context, IpmiSession session, IpmiPayload message, byte seq) {
+        IpmiReceiverKey key = new IpmiReceiverKey(context.getSystemAddress(), responseType.get(), seq);
+        QueueItem item = new QueueItem(session, message, key, responseReceiver.get());
+
+        queue.add(item);
+        queue.outstandingRequests ++;
+        doSend(context.getSystemAddress(), item);
     }
 
     private void doSend(@Nonnull SocketAddress systemAddress, @Nonnull QueueItem item) {

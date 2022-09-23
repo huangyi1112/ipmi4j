@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.anarres.ipmi.protocol.packet.rmcp;
+package org.anarres.ipmi.protocol.packet.common;
 
 import com.google.common.primitives.UnsignedBytes;
 import java.net.SocketAddress;
@@ -12,13 +12,12 @@ import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
 import org.anarres.ipmi.protocol.packet.asf.AbstractAsfData;
 import org.anarres.ipmi.protocol.packet.asf.AsfRmcpMessageType;
-import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
-import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.Ipmi15SessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.Ipmi20SessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionAuthenticationType;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.packet.rmcp.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

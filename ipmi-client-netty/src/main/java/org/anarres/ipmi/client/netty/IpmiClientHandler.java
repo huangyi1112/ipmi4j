@@ -7,7 +7,7 @@ package org.anarres.ipmi.client.netty;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.packet.rmcp.Packet;
+import org.anarres.ipmi.protocol.packet.common.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

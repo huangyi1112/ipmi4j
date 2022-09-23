@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.AbstractIpmiClient;
-import org.anarres.ipmi.protocol.packet.rmcp.Packet;
+import org.anarres.ipmi.protocol.packet.common.Packet;
 
 /**
  *

@@ -60,6 +60,7 @@ public abstract class AbstractAsfData extends AbstractWireable implements AsfRmc
                 + 4 // ianaEnterpriseNumber
                 + 1 // message type
                 + 1 // message tag
+                + 1 // reserved
                 + 1 // data length
                 + getDataWireLength();
     }

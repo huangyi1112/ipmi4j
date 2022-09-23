@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.packet.rmcp.Packet;
+import org.anarres.ipmi.protocol.packet.common.Packet;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
