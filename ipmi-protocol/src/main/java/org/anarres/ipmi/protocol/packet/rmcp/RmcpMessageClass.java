@@ -12,8 +12,8 @@ import org.anarres.ipmi.protocol.packet.common.Code;
  * @author shevek
  */
 public enum RmcpMessageClass implements Code.Wrapper {
-
     ASF(6), IPMI(7), OEM(8);
+
     final byte code;
 
     private RmcpMessageClass(int code) {

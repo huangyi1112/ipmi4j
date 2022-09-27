@@ -5,10 +5,11 @@
 package org.anarres.ipmi.protocol.packet.rmcp;
 
 import java.nio.ByteBuffer;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
+import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
+import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  *
@@ -24,8 +25,8 @@ public class OEMRmcpMessage extends AbstractWireable implements RmcpData {
     }
 
     @Override
-    public void apply(IpmiClientRmcpMessageHandler handler, IpmiHandlerContext context) {
-        handler.handleOemRmcpData(context, this);
+    public void apply(RmcpMessageHandler handler, IpmiEndpoint context, AbstractPacket packet) {
+        handler.handleOemRmcpData(context, this, packet.getSequenceNumber());
     }
 
     @Override

@@ -29,7 +29,8 @@ subprojects {
 		license 'Apache-2.0'
 	}
 
-	sourceCompatibility = 1.7
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
 }
 
 project(':ipmi-protocol') {

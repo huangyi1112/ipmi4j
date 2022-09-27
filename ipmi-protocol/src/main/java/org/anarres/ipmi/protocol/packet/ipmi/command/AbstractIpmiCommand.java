@@ -13,7 +13,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import org.anarres.ipmi.protocol.IanaEnterpriseNumber;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiPayloadHandler;
+import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.AbstractIpmiSessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiCommandName;
@@ -24,7 +24,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.payload.AbstractIpmiPayload;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayloadType;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public abstract class AbstractIpmiCommand extends AbstractIpmiPayload implements
     }
 
     @Override
-    public void apply(IpmiClientIpmiPayloadHandler handler, IpmiHandlerContext context, IpmiSession session) {
+    public void apply(IpmiMessageProcessor handler, IpmiEndpoint context, IpmiSession session) {
         handler.handleCommand(context, session, this);
     }
 

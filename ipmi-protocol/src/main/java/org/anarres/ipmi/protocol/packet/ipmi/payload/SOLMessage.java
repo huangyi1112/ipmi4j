@@ -5,10 +5,10 @@
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import java.nio.ByteBuffer;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiPayloadHandler;
+import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  * [IPMI2] Section 15.9, page 210.
@@ -23,7 +23,7 @@ public class SOLMessage extends AbstractIpmiPayload {
     }
 
     @Override
-    public void apply(IpmiClientIpmiPayloadHandler handler, IpmiHandlerContext context, IpmiSession session) {
+    public void apply(IpmiMessageProcessor handler, IpmiEndpoint context, IpmiSession session) {
         handler.handleSOL(context, session, this);
     }
 

@@ -5,7 +5,7 @@
 package org.anarres.ipmi.protocol.packet.ipmi.command.sensor;
 
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiCommandHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiCommandName;
 
 /**
@@ -21,7 +21,7 @@ public class GetSensorThresholdRequest extends AbstractIpmiGetSensorRequest {
     }
 
     @Override
-    public void apply(IpmiClientIpmiCommandHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientIpmiCommandHandler handler, IpmiEndpoint context) {
         handler.handleGetSensorThresholdRequest(context, this);
     }
 }

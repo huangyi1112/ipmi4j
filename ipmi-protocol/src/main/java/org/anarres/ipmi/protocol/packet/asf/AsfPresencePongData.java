@@ -10,7 +10,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientAsfMessageHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.common.Bits;
 
 /**
@@ -63,7 +63,7 @@ public class AsfPresencePongData extends AbstractAsfData {
     }
 
     @Override
-    public void apply(IpmiClientAsfMessageHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientAsfMessageHandler handler, IpmiEndpoint context) {
         handler.handleAsfPresencePongData(context, this);
     }
 

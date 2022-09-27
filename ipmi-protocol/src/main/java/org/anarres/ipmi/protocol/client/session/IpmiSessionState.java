@@ -9,7 +9,6 @@ package org.anarres.ipmi.protocol.client.session;
  * @author shevek
  */
 public enum IpmiSessionState {
-
     UNKNOWN,
     AUTHCAP,
     OPENSESSION,

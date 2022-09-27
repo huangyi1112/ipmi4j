@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiCommandHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiChannelNumber;
@@ -71,7 +71,7 @@ public class GetChannelAuthenticationCapabilitiesResponse extends AbstractIpmiRe
     }
 
     @Override
-    public void apply(IpmiClientIpmiCommandHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientIpmiCommandHandler handler, IpmiEndpoint context) {
         handler.handleGetChannelAuthenticationCapabilitiesResponse(context, this);
     }
 

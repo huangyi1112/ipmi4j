@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 public class IpmiClientHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpmiClientHandler.class);
-    private final IpmiClientImpl client;
+    private final NettyIpmiClient client;
 
-    public IpmiClientHandler(@Nonnull IpmiClientImpl client) {
+    public IpmiClientHandler(@Nonnull NettyIpmiClient client) {
         this.client = client;
     }
 

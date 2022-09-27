@@ -4,6 +4,8 @@
 package org.anarres.ipmi.protocol.client.visitor;
 
 import javax.annotation.Nonnull;
+
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.asf.AsfRmcpData;
 import org.anarres.ipmi.protocol.packet.asf.AsfResetData;
 import org.anarres.ipmi.protocol.packet.asf.AsfPowerUpData;
@@ -32,126 +34,126 @@ public interface IpmiClientAsfMessageHandler {
 
     public static class Adapter implements IpmiClientAsfMessageHandler {
 
-        public void handleDefault(@Nonnull IpmiHandlerContext context, @Nonnull AsfRmcpData message) {
+        public void handleDefault(@Nonnull IpmiEndpoint context, @Nonnull AsfRmcpData message) {
         }
 
         @Override
-        public void handleAsfResetData(IpmiHandlerContext context, AsfResetData message) {
+        public void handleAsfResetData(IpmiEndpoint context, AsfResetData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfPowerUpData(IpmiHandlerContext context, AsfPowerUpData message) {
+        public void handleAsfPowerUpData(IpmiEndpoint context, AsfPowerUpData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfUnconditionalPowerDownData(IpmiHandlerContext context, AsfUnconditionalPowerDownData message) {
+        public void handleAsfUnconditionalPowerDownData(IpmiEndpoint context, AsfUnconditionalPowerDownData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfPowerCycleResetData(IpmiHandlerContext context, AsfPowerCycleResetData message) {
+        public void handleAsfPowerCycleResetData(IpmiEndpoint context, AsfPowerCycleResetData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfPresencePongData(IpmiHandlerContext context, AsfPresencePongData message) {
+        public void handleAsfPresencePongData(IpmiEndpoint context, AsfPresencePongData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfCapabilitiesResponseData(IpmiHandlerContext context, AsfCapabilitiesResponseData message) {
+        public void handleAsfCapabilitiesResponseData(IpmiEndpoint context, AsfCapabilitiesResponseData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfSystemStateResponseData(IpmiHandlerContext context, AsfSystemStateResponseData message) {
+        public void handleAsfSystemStateResponseData(IpmiEndpoint context, AsfSystemStateResponseData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfOpenSessionResponseData(IpmiHandlerContext context, AsfOpenSessionResponseData message) {
+        public void handleAsfOpenSessionResponseData(IpmiEndpoint context, AsfOpenSessionResponseData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfCloseSessionResponseData(IpmiHandlerContext context, AsfCloseSessionResponseData message) {
+        public void handleAsfCloseSessionResponseData(IpmiEndpoint context, AsfCloseSessionResponseData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfPresencePingData(IpmiHandlerContext context, AsfPresencePingData message) {
+        public void handleAsfPresencePingData(IpmiEndpoint context, AsfPresencePingData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfCapabilitiesRequestData(IpmiHandlerContext context, AsfCapabilitiesRequestData message) {
+        public void handleAsfCapabilitiesRequestData(IpmiEndpoint context, AsfCapabilitiesRequestData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfSystemStateRequestData(IpmiHandlerContext context, AsfSystemStateRequestData message) {
+        public void handleAsfSystemStateRequestData(IpmiEndpoint context, AsfSystemStateRequestData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfOpenSessionRequestData(IpmiHandlerContext context, AsfOpenSessionRequestData message) {
+        public void handleAsfOpenSessionRequestData(IpmiEndpoint context, AsfOpenSessionRequestData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfCloseSessionRequestData(IpmiHandlerContext context, AsfCloseSessionRequestData message) {
+        public void handleAsfCloseSessionRequestData(IpmiEndpoint context, AsfCloseSessionRequestData message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfRAKPMessage1Data(IpmiHandlerContext context, AsfRAKPMessage1Data message) {
+        public void handleAsfRAKPMessage1Data(IpmiEndpoint context, AsfRAKPMessage1Data message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfRAKPMessage2Data(IpmiHandlerContext context, AsfRAKPMessage2Data message) {
+        public void handleAsfRAKPMessage2Data(IpmiEndpoint context, AsfRAKPMessage2Data message) {
             handleDefault(context, message);
         }
 
         @Override
-        public void handleAsfRAKPMessage3Data(IpmiHandlerContext context, AsfRAKPMessage3Data message) {
+        public void handleAsfRAKPMessage3Data(IpmiEndpoint context, AsfRAKPMessage3Data message) {
             handleDefault(context, message);
         }
     }
 
-    public void handleAsfResetData(@Nonnull IpmiHandlerContext context, @Nonnull AsfResetData message);
+    public void handleAsfResetData(@Nonnull IpmiEndpoint context, @Nonnull AsfResetData message);
 
-    public void handleAsfPowerUpData(@Nonnull IpmiHandlerContext context, @Nonnull AsfPowerUpData message);
+    public void handleAsfPowerUpData(@Nonnull IpmiEndpoint context, @Nonnull AsfPowerUpData message);
 
-    public void handleAsfUnconditionalPowerDownData(@Nonnull IpmiHandlerContext context, @Nonnull AsfUnconditionalPowerDownData message);
+    public void handleAsfUnconditionalPowerDownData(@Nonnull IpmiEndpoint context, @Nonnull AsfUnconditionalPowerDownData message);
 
-    public void handleAsfPowerCycleResetData(@Nonnull IpmiHandlerContext context, @Nonnull AsfPowerCycleResetData message);
+    public void handleAsfPowerCycleResetData(@Nonnull IpmiEndpoint context, @Nonnull AsfPowerCycleResetData message);
 
-    public void handleAsfPresencePongData(@Nonnull IpmiHandlerContext context, @Nonnull AsfPresencePongData message);
+    public void handleAsfPresencePongData(@Nonnull IpmiEndpoint context, @Nonnull AsfPresencePongData message);
 
-    public void handleAsfCapabilitiesResponseData(@Nonnull IpmiHandlerContext context, @Nonnull AsfCapabilitiesResponseData message);
+    public void handleAsfCapabilitiesResponseData(@Nonnull IpmiEndpoint context, @Nonnull AsfCapabilitiesResponseData message);
 
-    public void handleAsfSystemStateResponseData(@Nonnull IpmiHandlerContext context, @Nonnull AsfSystemStateResponseData message);
+    public void handleAsfSystemStateResponseData(@Nonnull IpmiEndpoint context, @Nonnull AsfSystemStateResponseData message);
 
-    public void handleAsfOpenSessionResponseData(@Nonnull IpmiHandlerContext context, @Nonnull AsfOpenSessionResponseData message);
+    public void handleAsfOpenSessionResponseData(@Nonnull IpmiEndpoint context, @Nonnull AsfOpenSessionResponseData message);
 
-    public void handleAsfCloseSessionResponseData(@Nonnull IpmiHandlerContext context, @Nonnull AsfCloseSessionResponseData message);
+    public void handleAsfCloseSessionResponseData(@Nonnull IpmiEndpoint context, @Nonnull AsfCloseSessionResponseData message);
 
-    public void handleAsfPresencePingData(@Nonnull IpmiHandlerContext context, @Nonnull AsfPresencePingData message);
+    public void handleAsfPresencePingData(@Nonnull IpmiEndpoint context, @Nonnull AsfPresencePingData message);
 
-    public void handleAsfCapabilitiesRequestData(@Nonnull IpmiHandlerContext context, @Nonnull AsfCapabilitiesRequestData message);
+    public void handleAsfCapabilitiesRequestData(@Nonnull IpmiEndpoint context, @Nonnull AsfCapabilitiesRequestData message);
 
-    public void handleAsfSystemStateRequestData(@Nonnull IpmiHandlerContext context, @Nonnull AsfSystemStateRequestData message);
+    public void handleAsfSystemStateRequestData(@Nonnull IpmiEndpoint context, @Nonnull AsfSystemStateRequestData message);
 
-    public void handleAsfOpenSessionRequestData(@Nonnull IpmiHandlerContext context, @Nonnull AsfOpenSessionRequestData message);
+    public void handleAsfOpenSessionRequestData(@Nonnull IpmiEndpoint context, @Nonnull AsfOpenSessionRequestData message);
 
-    public void handleAsfCloseSessionRequestData(@Nonnull IpmiHandlerContext context, @Nonnull AsfCloseSessionRequestData message);
+    public void handleAsfCloseSessionRequestData(@Nonnull IpmiEndpoint context, @Nonnull AsfCloseSessionRequestData message);
 
-    public void handleAsfRAKPMessage1Data(@Nonnull IpmiHandlerContext context, @Nonnull AsfRAKPMessage1Data message);
+    public void handleAsfRAKPMessage1Data(@Nonnull IpmiEndpoint context, @Nonnull AsfRAKPMessage1Data message);
 
-    public void handleAsfRAKPMessage2Data(@Nonnull IpmiHandlerContext context, @Nonnull AsfRAKPMessage2Data message);
+    public void handleAsfRAKPMessage2Data(@Nonnull IpmiEndpoint context, @Nonnull AsfRAKPMessage2Data message);
 
-    public void handleAsfRAKPMessage3Data(@Nonnull IpmiHandlerContext context, @Nonnull AsfRAKPMessage3Data message);
+    public void handleAsfRAKPMessage3Data(@Nonnull IpmiEndpoint context, @Nonnull AsfRAKPMessage3Data message);
 }

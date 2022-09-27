@@ -8,13 +8,14 @@ import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiPayloadHandler;
+
+import org.anarres.ipmi.protocol.IpmiUtils;
+import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.session.IpmiSessionManager;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  * [IPMI2] Section 13.20 page 150.
@@ -79,7 +80,7 @@ public class IpmiRAKPMessage1 extends AbstractTaggedIpmiPayload {
     public IpmiRAKPMessage1(@Nonnull IpmiSession session) {
         this.systemSessionId = session.getSystemSessionId();
         byte[] tmp = new byte[16];
-        IpmiSessionManager.RANDOM.nextBytes(tmp);
+        IpmiUtils.RANDOM.nextBytes(tmp);
         this.consoleRandom = tmp;
     }
 
@@ -99,7 +100,7 @@ public class IpmiRAKPMessage1 extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    public void apply(IpmiClientIpmiPayloadHandler handler, IpmiHandlerContext context, IpmiSession session) {
+    public void apply(IpmiMessageProcessor handler, IpmiEndpoint context, IpmiSession session) {
         handler.handleRAKPMessage1(context, session, this);
     }
 

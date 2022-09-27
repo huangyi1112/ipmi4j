@@ -7,7 +7,7 @@ package org.anarres.ipmi.protocol.packet.ipmi.payload;
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiPayloadHandler;
+import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiAlgorithmUtils;
@@ -16,7 +16,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiConfidentialityAlgorit
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  * [IPMI2] Section 13.17, table 13-9, page 147.
@@ -58,7 +58,7 @@ public class IpmiOpenSessionRequest extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    public void apply(IpmiClientIpmiPayloadHandler handler, IpmiHandlerContext context, IpmiSession session) {
+    public void apply(IpmiMessageProcessor handler, IpmiEndpoint context, IpmiSession session) {
         handler.handleOpenSessionRequest(context, session, this);
     }
 

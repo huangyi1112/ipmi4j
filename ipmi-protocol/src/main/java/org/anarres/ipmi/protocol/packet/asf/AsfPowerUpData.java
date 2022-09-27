@@ -5,7 +5,7 @@
 package org.anarres.ipmi.protocol.packet.asf;
 
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientAsfMessageHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  * PowerUp.
@@ -24,7 +24,7 @@ public class AsfPowerUpData extends AbstractAsfBootData {
     }
 
     @Override
-    public void apply(IpmiClientAsfMessageHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientAsfMessageHandler handler, IpmiEndpoint context) {
         handler.handleAsfPowerUpData(context, this);
     }
 }

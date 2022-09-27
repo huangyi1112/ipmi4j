@@ -9,14 +9,14 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
+import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
 import org.anarres.ipmi.protocol.packet.asf.AbstractAsfData;
 import org.anarres.ipmi.protocol.packet.asf.AsfRmcpMessageType;
 import org.anarres.ipmi.protocol.packet.ipmi.Ipmi15SessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.Ipmi20SessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionAuthenticationType;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.rmcp.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public abstract class AbstractPacket extends AbstractWireable implements Packet 
     private SocketAddress remoteAddress;
     protected static final int RMCP_HEADER_LENGTH = 4;
     private final RmcpVersion version = RmcpVersion.ASF_RMCP_2_0;
-    /** 0xFF means do not generate an ACK. */
+    /** 0xFF means do not generate an ACK. Also set to 0xFF for IPMI requests over RMCP */
     private byte sequenceNumber = (byte) 0xFF;
     private RmcpMessageClass messageClass;
     private RmcpMessageRole messageRole = RmcpMessageRole.REQ;
@@ -111,8 +111,8 @@ public abstract class AbstractPacket extends AbstractWireable implements Packet 
     }
 
     @Override
-    public void apply(IpmiClientRmcpMessageHandler handler, IpmiHandlerContext context) {
-        getData().apply(handler, context);
+    public void apply(RmcpMessageHandler handler, IpmiEndpoint context) {
+        getData().apply(handler, context, this);
     }
 
     @Nonnegative

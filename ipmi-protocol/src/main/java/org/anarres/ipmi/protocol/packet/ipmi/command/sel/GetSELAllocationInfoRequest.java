@@ -5,7 +5,7 @@
 package org.anarres.ipmi.protocol.packet.ipmi.command.sel;
 
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiCommandHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiCommandName;
 import org.anarres.ipmi.protocol.packet.ipmi.command.AbstractIpmiSimpleRequest;
 
@@ -22,7 +22,7 @@ public class GetSELAllocationInfoRequest extends AbstractIpmiSimpleRequest {
     }
 
     @Override
-    public void apply(IpmiClientIpmiCommandHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientIpmiCommandHandler handler, IpmiEndpoint context) {
         handler.handleGetSELAllocationInfoRequest(context, this);
     }
 }

@@ -8,7 +8,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientIpmiCommandHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiCommandName;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiLun;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
@@ -22,7 +22,7 @@ public interface IpmiCommand extends IpmiPayload {
 
     public static final int SEQUENCE_NUMBER_MASK = 0x3F;
 
-    public void apply(@Nonnull IpmiClientIpmiCommandHandler handler, @CheckForNull IpmiHandlerContext context);
+    public void apply(@Nonnull IpmiClientIpmiCommandHandler handler, @CheckForNull IpmiEndpoint context);
 
     public byte getTargetAddress();
 

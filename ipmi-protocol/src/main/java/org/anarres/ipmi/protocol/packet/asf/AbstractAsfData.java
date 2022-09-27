@@ -9,10 +9,11 @@ import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.IanaEnterpriseNumber;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
+import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
+import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpMessageClass;
 
 /**
@@ -42,8 +43,8 @@ public abstract class AbstractAsfData extends AbstractWireable implements AsfRmc
     }
 
     @Override
-    public void apply(IpmiClientRmcpMessageHandler handler, IpmiHandlerContext context) {
-        handler.handleAsfRmcpData(context, this);
+    public void apply(RmcpMessageHandler handler, IpmiEndpoint context, AbstractPacket packet) {
+        handler.handleAsfRmcpData(context, this, packet.getSequenceNumber());
     }
 
     public byte getMessageTag() {

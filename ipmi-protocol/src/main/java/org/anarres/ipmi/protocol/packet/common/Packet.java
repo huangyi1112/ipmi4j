@@ -2,8 +2,8 @@ package org.anarres.ipmi.protocol.packet.common;
 
 import java.net.SocketAddress;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.rmcp.Encapsulation;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
 
@@ -33,5 +33,5 @@ public interface Packet extends Wireable, Encapsulation {
     @Nonnull
     public Packet withData(@Nonnull RmcpData data);
 
-    public void apply(@Nonnull IpmiClientRmcpMessageHandler handler, @Nonnull IpmiHandlerContext context);
+    public void apply(@Nonnull RmcpMessageHandler handler, @Nonnull IpmiEndpoint context);
 }

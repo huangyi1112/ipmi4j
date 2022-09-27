@@ -9,10 +9,15 @@ import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionAuthenticationType;
+import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiRequest;
+import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiResponse;
 import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesResponse;
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiAuthenticationAlgorithm;
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiConfidentialityAlgorithm;
@@ -25,6 +30,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
 public class IpmiSession {
 
     private IpmiSessionState state = IpmiSessionState.UNKNOWN;
+    private final IpmiEndpoint endpoint;
     private final int consoleSessionId;
     public GetChannelAuthenticationCapabilitiesResponse channelAuthenticationCapabilities;
     private int systemSessionId;
@@ -36,7 +42,8 @@ public class IpmiSession {
     private IpmiConfidentialityAlgorithm.State confidentialityAlgorithmState;
     private IpmiIntegrityAlgorithm integrityAlgorithm;
 
-    public IpmiSession(int consoleSessionId) {
+    public IpmiSession(IpmiEndpoint endpoint, int consoleSessionId) {
+        this.endpoint = endpoint;
         this.consoleSessionId = consoleSessionId;
     }
 
@@ -101,6 +108,10 @@ public class IpmiSession {
 
     public void setIntegrityAlgorithm(IpmiIntegrityAlgorithm integrityAlgorithm) {
         this.integrityAlgorithm = integrityAlgorithm;
+    }
+
+    public <T extends IpmiResponse> Future<T> send(IpmiRequest ipmiRequest) {
+        return endpoint.sendIpmiRequest(this, ipmiRequest);
     }
 
     /** [IPMI2] Section 13.32, page 165. */

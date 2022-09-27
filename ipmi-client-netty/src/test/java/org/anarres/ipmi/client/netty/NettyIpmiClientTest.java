@@ -4,72 +4,76 @@
  */
 package org.anarres.ipmi.client.netty;
 
-import org.anarres.ipmi.protocol.client.IpmiClient;
-import org.anarres.ipmi.protocol.client.dispatch.AbstractIpmiReceiver;
-import org.anarres.ipmi.protocol.client.dispatch.IpmiReceiver;
-import org.anarres.ipmi.protocol.client.dispatch.IpmiReceiverKey;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.asf.AsfPresencePingData;
-import org.anarres.ipmi.protocol.packet.ipmi.Ipmi15SessionWrapper;
+import org.anarres.ipmi.protocol.packet.asf.AsfPresencePongData;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiChannelPrivilegeLevel;
-import org.anarres.ipmi.protocol.packet.ipmi.IpmiLun;
-import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
-import org.anarres.ipmi.protocol.packet.ipmi.command.AbstractIpmiResponse;
 import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesRequest;
 import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesResponse;
-import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
-import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
-import org.junit.Assert;
 import org.junit.Test;
 
-import javax.annotation.Nonnull;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 // import static org.junit.Assert.*;
 
 /**
  *
  * @author shevek
  */
-public class IpmiClientImplTest {
-
+public class NettyIpmiClientTest {
     @Test
     public void testClient() throws Exception {
-        IpmiClientImpl client = new IpmiClientImpl();
+        NettyIpmiClient client = new NettyIpmiClient();
 
         client.start();
 
-        InetSocketAddress serverAddr = new InetSocketAddress("192.168.3.254", 623);
-        IpmiHandlerContext context = new IpmiHandlerContext(client, serverAddr);
-        IpmiSession session = client.getSessionManager().newIpmiSession();
+        IpmiEndpoint context = client.getEndpoint(new InetSocketAddress("192.168.3.254", 623));
+
+        Future<AsfPresencePongData> pongFuture2 = context.sendAsfRequest(new AsfPresencePingData());
+
+        Future<AsfPresencePongData> pongFuture = context.sendAsfRequest(new AsfPresencePingData());
+        AsfPresencePongData pong = pongFuture.get();
+
+        System.out.println("Got PONG data: \n" + pong);
+
+
+        IpmiSession session = context.newSession();
+
+        // todo:
+        //   session shall be opened before using
 
         GetChannelAuthenticationCapabilitiesRequest request = new GetChannelAuthenticationCapabilitiesRequest();
         request.extendedCapabilities = true;
         request.channelPrivilegeLevel = IpmiChannelPrivilegeLevel.User;
 
+        Future<GetChannelAuthenticationCapabilitiesResponse> future = session.send(request);
+        GetChannelAuthenticationCapabilitiesResponse resp = future.get();
+
+
+
+        /*
         final CountDownLatch latch = new CountDownLatch(1);
 
-        IpmiReceiver receiver = new AbstractIpmiReceiver(AbstractIpmiResponse.class) {
+        ResponseProcessor receiver = new ResponseProcessor<GetChannelAuthenticationCapabilitiesResponse>() {
             @Override
-            protected void doReceive(@Nonnull IpmiHandlerContext context, @Nonnull IpmiSession session, @Nonnull IpmiPayload response) {
+            public void receive(@Nonnull IpmiEndpoint context, @Nonnull IpmiSession session, @Nonnull GetChannelAuthenticationCapabilitiesResponse response) {
                 System.out.println("Hello, world!");
                 latch.countDown();
             }
 
             @Override
-            public void timeout(@Nonnull IpmiReceiverKey key) {
+            public void timeout(@Nonnull RequestKey key) {
                 System.out.println("Timedout!");
                 latch.countDown();
             }
         };
 
-        context.send(session, request, GetChannelAuthenticationCapabilitiesResponse.class, receiver);
+        context.queueIpmiRequest(session, request, GetChannelAuthenticationCapabilitiesResponse.class, receiver);
+        // context.queueIpmiRequest(session, request, receiver);
 
         RmcpPacket packet = new RmcpPacket();
-        packet.withRemoteAddress(serverAddr);
+        packet.withRemoteAddress(context.getSystemAddress());
         packet.withData(new AsfPresencePingData());
         client.send(packet);
 
@@ -84,6 +88,7 @@ public class IpmiClientImplTest {
         catch(Exception e) {
             Assert.assertTrue(false);
         }
+        */
 
         Thread.sleep(5000);
         /*

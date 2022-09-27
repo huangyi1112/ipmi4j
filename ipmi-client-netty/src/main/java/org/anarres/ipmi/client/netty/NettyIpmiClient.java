@@ -13,21 +13,22 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.AbstractIpmiClient;
+import org.anarres.ipmi.protocol.client.IpmiClient;
+import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.packet.common.Packet;
 
 /**
  *
  * @author shevek
  */
-public class IpmiClientImpl extends AbstractIpmiClient {
+public class NettyIpmiClient extends IpmiClient {
 
     private Channel channel;
     private final IpmiPipelineInitializer.SharedHandlers sharedHandlers;
     private IpmiChannelType channelType = IpmiChannelType.NIO;
 
-    public IpmiClientImpl() {
-        this.sharedHandlers = new IpmiPipelineInitializer.SharedHandlers(getSessionManager());
+    public NettyIpmiClient() {
+        this.sharedHandlers = new IpmiPipelineInitializer.SharedHandlers(new IpmiPacketContext());
     }
 
     public void setDebug(boolean debug) {

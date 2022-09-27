@@ -16,7 +16,6 @@ import org.anarres.ipmi.protocol.packet.ipmi.IpmiLun;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesRequest;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.client.session.IpmiSessionManager;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,7 +38,7 @@ public class IpmiCommandTest {
         }
     }
     private final Formatter formatter = new Formatter();
-    private final IpmiPacketContext context = new IpmiSessionManager();
+    private final IpmiPacketContext context = new IpmiPacketContext();
 
     @Nonnull
     private static byte[] toByteArray(@Nonnull int... ints) {

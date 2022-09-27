@@ -8,7 +8,8 @@ import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import org.anarres.ipmi.protocol.client.visitor.IpmiClientRmcpMessageHandler;
+import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
+import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.command.AbstractIpmiCommand;
@@ -24,7 +25,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.payload.SOLMessage;
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.OemExplicit;
 import org.anarres.ipmi.protocol.packet.rmcp.Encapsulation;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpMessageClass;
@@ -126,8 +127,8 @@ public abstract class AbstractIpmiSessionWrapper extends AbstractWireable implem
     }
 
     @Override
-    public void apply(IpmiClientRmcpMessageHandler handler, IpmiHandlerContext context) {
-        handler.handleIpmiRmcpData(context, this);
+    public void apply(RmcpMessageHandler handler, IpmiEndpoint context, AbstractPacket packet) {
+        handler.handleIpmiRmcpData(context, this, packet.getSequenceNumber());
     }
 
     /*

@@ -87,7 +87,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     public int getWireLength(IpmiPacketContext context) {
         try {
             @CheckForNull
-            IpmiSession session = context.getIpmiSession(getIpmiSessionId());
+            IpmiSession session = context.get(IpmiPacketContext.SESSION);
 
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
@@ -122,7 +122,8 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     public void toWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
         try {
             @CheckForNull
-            IpmiSession session = context.getIpmiSession(getIpmiSessionId());
+            IpmiSession session = context.get(IpmiPacketContext.SESSION);
+            // IpmiSession session = context.getIpmiSession(getIpmiSessionId());
 
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
@@ -198,7 +199,8 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             setIpmiSessionId(sessionId);
             setIpmiSessionSequenceNumber(fromWireIntLE(buffer));
 
-            IpmiSession session = context.getIpmiSession(sessionId);
+            IpmiSession session = context.get(IpmiPacketContext.SESSION);
+            // IpmiSession session = context.getIpmiSession(sessionId);
             IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);

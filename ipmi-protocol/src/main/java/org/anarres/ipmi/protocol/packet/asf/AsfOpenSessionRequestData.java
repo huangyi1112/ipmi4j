@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.client.visitor.IpmiClientAsfMessageHandler;
-import org.anarres.ipmi.protocol.client.visitor.IpmiHandlerContext;
+import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 
 /**
  * OpenSessionRequest.
@@ -40,7 +40,7 @@ public class AsfOpenSessionRequestData extends AbstractAsfData {
     }
 
     @Override
-    public void apply(IpmiClientAsfMessageHandler handler, IpmiHandlerContext context) {
+    public void apply(IpmiClientAsfMessageHandler handler, IpmiEndpoint context) {
         handler.handleAsfOpenSessionRequestData(context, this);
     }
 

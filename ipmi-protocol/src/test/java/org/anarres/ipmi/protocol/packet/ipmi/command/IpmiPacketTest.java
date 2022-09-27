@@ -12,7 +12,6 @@ import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiOpenSessionResponse;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
-import org.anarres.ipmi.protocol.client.session.IpmiSessionManager;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
 import org.anarres.ipmi.protocol.packet.rmcp.RspRmcpPacket;
 import org.junit.Before;
@@ -29,7 +28,7 @@ import static org.junit.Assert.*;
 public class IpmiPacketTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpmiPacketTest.class);
-    private final IpmiPacketContext context = new IpmiSessionManager();
+    private final IpmiPacketContext context = new IpmiPacketContext();
 
     @Before
     public void setUp() throws Exception {
