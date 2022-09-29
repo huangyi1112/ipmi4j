@@ -92,8 +92,15 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId());
             // IpmiSession session = context.get(IpmiPacketContext.SESSION);
 
-            IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
-            IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            // IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
+            // IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            IpmiConfidentialityAlgorithm confidentialityAlgorithm = IpmiConfidentialityAlgorithm.NONE;
+            IpmiIntegrityAlgorithm integrityAlgorithm = IpmiIntegrityAlgorithm.NONE;
+
+            if(session != null) {
+                confidentialityAlgorithm = session.getConfidentialityAlgorithm();
+                integrityAlgorithm = session.getIntegrityAlgorithm();
+            }
 
             IpmiPayload payload = getIpmiPayload();
 
@@ -102,10 +109,11 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             int encryptedLength = confidentialityAlgorithm.getEncryptedLength(session, unencryptedLength);
             int integrityLength = (session == null)
                     ? 0
-                    : IntegrityPad.PAD(encryptedLength).length
+                    : IntegrityPad.PAD(integrityAlgorithm.getMacLength() + 2).length
                     + 1 // pad length
                     + 1 // next header
                     + integrityAlgorithm.getMacLength();
+
             return 1 // authenticationType
                     + 1 // payloadType
                     + (oem ? 4 : 0) // oemEnterpriseNumber
@@ -147,6 +155,8 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             IpmiPayload payload = getIpmiPayload();
 
             // Page 133
+            ByteBuffer integrityInput = buffer.duplicate();
+
             buffer.put(AUTHENTICATION_TYPE.getCode());
             byte payloadTypeByte = payload.getPayloadType().getCode();
             payloadTypeByte = AbstractIpmiCommand.setBit(payloadTypeByte, 7, encrypted);
@@ -159,8 +169,6 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             }
             toWireIntLE(buffer, getIpmiSessionId());
             toWireIntLE(buffer, getIpmiSessionSequenceNumber());
-
-            ByteBuffer integrityInput = buffer.duplicate();
 
             // Page 134
             // 2 byte payload length
@@ -184,14 +192,20 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             SIGN:
             if (!IpmiIntegrityAlgorithm.NONE.equals(integrityAlgorithm)) {
                 // Integrity padding.
-                byte[] pad = IntegrityPad.PAD(encryptedLength);
+                // IPMI v2. P 134. Calculating of Integrity PAD
+                byte[] pad = IntegrityPad.PAD(
+                        integrityAlgorithm.getMacLength()
+                                + 1   // pad len
+                                + 1   // next header, fix to 0x07
+                );
+
                 buffer.put(pad);
                 buffer.put((byte) pad.length);
                 buffer.put((byte) 0x07); // Reserved, [IPMI2] Page 134, next-header field.
 
                 integrityInput.limit(buffer.position());
-                byte[] integrityData = integrityAlgorithm.sign(session, integrityInput);
-                buffer.put(integrityData);
+                byte[] authCode = integrityAlgorithm.sign(session, integrityInput);
+                buffer.put(authCode);
             }
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);

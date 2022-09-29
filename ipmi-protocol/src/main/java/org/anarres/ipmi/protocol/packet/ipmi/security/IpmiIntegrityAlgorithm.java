@@ -35,7 +35,7 @@ public enum IpmiIntegrityAlgorithm implements IpmiAlgorithm {
         @Override
         protected MAC newImplementation(IpmiSession session) throws NoSuchAlgorithmException, InvalidKeyException {
             MAC mac = new HMAC_SHA1_96(null);
-            mac.init(session.getAdditionalKey(1));
+            mac.init(session.getAdditionalKey1());
             return mac;
         }
     },
@@ -43,7 +43,7 @@ public enum IpmiIntegrityAlgorithm implements IpmiAlgorithm {
         @Override
         protected MAC newImplementation(IpmiSession session) throws NoSuchAlgorithmException, InvalidKeyException {
             MAC mac = new HMAC_MD5_128(null);
-            mac.init(session.getAdditionalKey(1));
+            mac.init(session.getAdditionalKey1());
             return mac;
         }
     },
@@ -58,7 +58,7 @@ public enum IpmiIntegrityAlgorithm implements IpmiAlgorithm {
         @Override
         protected MAC newImplementation(IpmiSession session) throws NoSuchAlgorithmException, InvalidKeyException {
             MAC mac = new HMAC_SHA256_128(null);
-            mac.init(session.getAdditionalKey(1));
+            mac.init(session.getAdditionalKey1());
             return mac;
         }
     };

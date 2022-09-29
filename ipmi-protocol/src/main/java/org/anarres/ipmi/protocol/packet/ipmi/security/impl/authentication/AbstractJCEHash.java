@@ -15,7 +15,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.impl.integrity.AbstractJCE
  */
 public abstract class AbstractJCEHash extends AbstractJCEGenericMAC implements Hash {
 
-    public AbstractJCEHash(@Nonnull String algorithm, String key) throws NoSuchAlgorithmException, InvalidKeyException {
+    public AbstractJCEHash(@Nonnull String algorithm, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
         super(algorithm, key);
     }
 

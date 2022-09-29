@@ -6,8 +6,6 @@ package org.anarres.ipmi.protocol.client.session;
 
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -19,7 +17,6 @@ import javax.annotation.Nonnull;
 
 import org.anarres.ipmi.protocol.client.IpmiEndpoint;
 import org.anarres.ipmi.protocol.packet.asf.AsfRsspSessionStatus;
-import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionAuthenticationType;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiRequest;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiResponse;
@@ -42,8 +39,8 @@ public class IpmiSession {
     private final int consoleSessionId;
     public GetChannelAuthenticationCapabilitiesResponse channelAuthenticationCapabilities;
     private int systemSessionId;
-    private AtomicInteger encryptedSequenceNumber = new AtomicInteger(0);
-    private AtomicInteger unencryptedSequenceNumber = new AtomicInteger(0);
+    private AtomicInteger encryptedSequenceNumber = new AtomicInteger(1);
+    private AtomicInteger unencryptedSequenceNumber = new AtomicInteger(1);
     private IpmiSessionAuthenticationType authenticationType = IpmiSessionAuthenticationType.RMCPP;
     private IpmiAuthenticationAlgorithm authenticationAlgorithm;
     private IpmiConfidentialityAlgorithm confidentialityAlgorithm;
@@ -51,6 +48,8 @@ public class IpmiSession {
     private IpmiIntegrityAlgorithm integrityAlgorithm;
 
     private byte[] sessionIntegrationKey;
+    private byte[] additionalKey1;
+    private byte[] additionalKey2;
 
     private String username;
     private String password;
@@ -227,11 +226,14 @@ public class IpmiSession {
                     System.out.println("Got RAKP message auth code invalid!");
                 }
 
-                sessionIntegrationKey = generateSessionIntegrationKey(rakp1Req, rakp2Res);
+                sessionIntegrationKey = generateSIK(rakp1Req, rakp2Res);
             }
             else {
                 sessionIntegrationKey = new byte[0];
             }
+
+            additionalKey1 = getAdditionalKey(1);
+            additionalKey2 = getAdditionalKey(2);
 
             /*
             if ((rc = ipmi_lanplus_rakp3(intf)) == 1) {
@@ -275,13 +277,12 @@ public class IpmiSession {
         return endpoint.sendIpmiRequest(this, ipmiRequest);
     }
 
-    /** [IPMI2] Section 13.32, page 165. */
-    @Nonnull
-    public byte[] getAdditionalKey(@Nonnegative int idx) throws NoSuchAlgorithmException, InvalidKeyException {
-        IpmiAuthenticationAlgorithm algorithm = getAuthenticationAlgorithm();
-        byte[] raw = new byte[algorithm.getHashLength()];   // Should this be 20, or the hash length?
-        Arrays.fill(raw, UnsignedBytes.checkedCast(idx));
-        return algorithm.hash(password, ByteBuffer.wrap(raw));
+    public byte[] getAdditionalKey1() {
+        return additionalKey1;
+    }
+
+    public byte[] getAdditionalKey2() {
+        return additionalKey2;
     }
 
     private void initSessionAlgorithms(int cipherSuiteId) {
@@ -384,13 +385,12 @@ public class IpmiSession {
      * @param rakp1
      * @return
      */
-    private byte[] generateSessionIntegrationKey(IpmiRAKPMessage1 rakp1, IpmiRAKPMessage2 rakp2) throws NoSuchAlgorithmException, InvalidKeyException {
-        /**
-         * Kg key associated with the target BMC. Should be null if Get Channel
-         * Authentication Capabilities Response indicated that Kg is disabled which
-         * means that 'one-key' logins are being used (
-         * {@link GetChannelAuthenticationCapabilitiesResponseData#isKgEnabled()} ==
-         * false)
+    private byte[] generateSIK(IpmiRAKPMessage1 rakp1, IpmiRAKPMessage2 rakp2) throws NoSuchAlgorithmException, InvalidKeyException {
+        /* TODO: We will be hashing with Kg */
+        /*
+         * Section 13.31 of the IPMI v2 spec describes the SIK creation
+         * using Kg.  It specifies that Kg should not be truncated.
+         * Kg is set in ipmi_intf.
          */
         /*
         if (getBmcKey() == null || getBmcKey().length <= 0) {
@@ -404,4 +404,17 @@ public class IpmiSession {
         return authenticationAlgorithm.hash(password, rakp2.prepareSIKData(rakp1));
     }
 
+    /** [IPMI2] Section 13.32, page 165. */
+    @Nonnull
+    private byte[] getAdditionalKey(@Nonnegative int idx) throws NoSuchAlgorithmException, InvalidKeyException {
+        byte[] raw = new byte[20];   // Should this be 20, or the hash length?
+        Arrays.fill(raw, UnsignedBytes.checkedCast(idx));
+
+        if (authenticationAlgorithm == IpmiAuthenticationAlgorithm.RAKP_NONE) {
+            return raw;
+        }
+
+        // key.length shall match authenticationAlgorithm.getLength
+        return authenticationAlgorithm.hash(sessionIntegrationKey, ByteBuffer.wrap(raw));
+    }
 }

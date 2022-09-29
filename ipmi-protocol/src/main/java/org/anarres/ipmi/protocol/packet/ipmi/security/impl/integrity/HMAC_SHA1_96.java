@@ -15,7 +15,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
  */
 public class HMAC_SHA1_96 extends AbstractJCEMAC {
 
-    public HMAC_SHA1_96(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+    public HMAC_SHA1_96(byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
         super("HmacSHA1", key);
     }
 

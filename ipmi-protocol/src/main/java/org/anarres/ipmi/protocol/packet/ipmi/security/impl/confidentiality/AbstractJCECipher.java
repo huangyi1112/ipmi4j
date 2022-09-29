@@ -36,7 +36,7 @@ public abstract class AbstractJCECipher implements Cipher {
         return cipher.getBlockSize();
     }
 
-    protected void init(Mode mode, SecretKeySpec key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
+    protected byte[] init(Mode mode, SecretKeySpec key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
         final int cipherMode;
         switch (mode) {
             case ENCRYPT:
@@ -48,7 +48,14 @@ public abstract class AbstractJCECipher implements Cipher {
             default:
                 throw new IllegalArgumentException("Illegal mode " + mode);
         }
-        cipher.init(cipherMode, key, new IvParameterSpec(iv));
+        if(iv == null) {
+            cipher.init(cipherMode, key);
+        }
+        else {
+            cipher.init(cipherMode, key, new IvParameterSpec(iv));
+        }
+
+        return cipher.getIV();
     }
 
     @Override

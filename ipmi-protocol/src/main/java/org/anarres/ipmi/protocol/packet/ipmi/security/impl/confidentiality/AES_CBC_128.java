@@ -28,7 +28,13 @@ public class AES_CBC_128 extends AbstractJCECipher {
     }
 
     @Override
-    public void init(Mode mode, byte[] key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
-        super.init(mode, new SecretKeySpec(key, "AES"), iv);
+    public byte[] init(Mode mode, byte[] key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
+        // if key is too large (> 16), only use the first 16 bytes
+        if(key.length > 16) {
+            return super.init(mode, new SecretKeySpec(key, 0, 16, "AES"), iv);
+        }
+        else {
+            return super.init(mode, new SecretKeySpec(key, "AES"), iv);
+        }
     }
 }

@@ -37,7 +37,7 @@ public interface Cipher {
     /**
      * @see javax.crypto.Cipher#init(int, Key, AlgorithmParameterSpec)
      */
-    public void init(@Nonnull Mode mode, @Nonnull byte[] key, @Nonnull byte[] iv)
+    public byte[] init(@Nonnull Mode mode, @Nonnull byte[] key, byte[] iv)
             throws InvalidKeyException, InvalidAlgorithmParameterException;
 
     /**

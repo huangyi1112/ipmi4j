@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
  */
 public abstract class AbstractJCEMAC extends AbstractJCEGenericMAC implements MAC {
 
-    public AbstractJCEMAC(@Nonnull String algorithm, String key) throws NoSuchAlgorithmException, InvalidKeyException {
+    public AbstractJCEMAC(@Nonnull String algorithm, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
         super(algorithm, key);
     }
 

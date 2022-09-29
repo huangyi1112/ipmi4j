@@ -15,7 +15,7 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiAuthenticationAlgorith
  */
 public class RAKP_HMAC_SHA256 extends AbstractJCEHash {
 
-    public RAKP_HMAC_SHA256(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+    public RAKP_HMAC_SHA256(byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
         super("HmacSHA256", key);
     }
 

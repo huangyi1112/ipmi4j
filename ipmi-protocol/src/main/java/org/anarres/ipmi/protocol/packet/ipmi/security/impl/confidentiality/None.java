@@ -33,7 +33,8 @@ public class None implements Cipher {
     }
 
     @Override
-    public void init(Mode mode, byte[] key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
+    public byte[] init(Mode mode, byte[] key, byte[] iv) throws InvalidKeyException, InvalidAlgorithmParameterException {
+        return new byte[0];
     }
 
     @Override

@@ -20,10 +20,10 @@ public abstract class AbstractJCEGenericMAC implements GenericMAC {
 
     private final Mac mac;
 
-    protected AbstractJCEGenericMAC(@Nonnull String algorithm, String key) throws NoSuchAlgorithmException, InvalidKeyException {
+    protected AbstractJCEGenericMAC(@Nonnull String algorithm, byte[] key) throws NoSuchAlgorithmException, InvalidKeyException {
         mac = Mac.getInstance(algorithm);
         if(key != null) {
-            init(key.getBytes(StandardCharsets.UTF_8));
+            init(key);
         }
     }
 

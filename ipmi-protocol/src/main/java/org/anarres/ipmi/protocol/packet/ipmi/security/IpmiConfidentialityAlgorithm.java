@@ -52,37 +52,48 @@ public enum IpmiConfidentialityAlgorithm implements IpmiAlgorithm {
             return 16 - m;
         }
 
+        /**
+         * IPMI v2 13.29: Note the way to padd!!
+         */
         @Override
         public int getEncryptedLength(IpmiSession session, int unencryptedLength) {
+            int size = 16 + unencryptedLength + 1; // total required bytes
+
+            return size + pad(size);
+            /*
             return 16 // IV
                     + unencryptedLength
                     + pad(unencryptedLength) // trailer: encrypted by AES
                     + 1;    // pad length
+             */
         }
 
+        /**
+         * IPMIv2 13.29: data + pad, where the last padding is the length of the total pad bytes up to 16
+         */
         @Override
         public void encrypt(IpmiSession session, ByteBuffer out, ByteBuffer in)
                 throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, ShortBufferException {
-            byte[] iv = session.newRandomSeed(16);
-            byte[] key = session.getAdditionalKey(2);
-            out.put(iv);
+            int padLength = pad(16 + in.remaining() + 1);
+
+            byte[] key = session.getAdditionalKey2();
             AES_CBC_128 cipher = new AES_CBC_128();
-            cipher.init(Cipher.Mode.ENCRYPT, key, iv);
+            byte[] iv = cipher.init(Cipher.Mode.ENCRYPT, key, null);
+
+            out.put(iv);
+
             cipher.update(in, out);
 
-            PAD:
-            {
-                int padLength = pad(in.remaining());
-                if (padLength > 0) {
-                    ByteBuffer pad = ByteBuffer.allocate(padLength);
-                    // Pad bytes shall start at 1 and have a monotonically increasing value.
-                    int i = 1;
-                    while (pad.hasRemaining())
-                        pad.put(UnsignedBytes.checkedCast(i++));
-                    cipher.update(pad, out);
-                }
-                out.put(UnsignedBytes.checkedCast(padLength));
+            ByteBuffer padBuffer = ByteBuffer.allocate(padLength + 1);  // plus 1 for the last len
+
+            // Pad bytes shall start at 1 and have a monotonically increasing value.
+            for(int i = 1; i <= padLength; i++) {
+                padBuffer.put(UnsignedBytes.checkedCast(i));
             }
+
+            padBuffer.put((byte) padLength);
+            padBuffer.flip();
+            cipher.update(padBuffer, out);
         }
 
         @Override
@@ -94,7 +105,7 @@ public enum IpmiConfidentialityAlgorithm implements IpmiAlgorithm {
 
             ByteBuffer payload = ByteBuffer.allocate(in.remaining());
             byte[] iv = AbstractWireable.readBytes(in, 16);
-            byte[] key = session.getAdditionalKey(2);
+            byte[] key = session.getAdditionalKey2();
             AES_CBC_128 cipher = new AES_CBC_128();
             cipher.init(Cipher.Mode.DECRYPT, key, iv);
             cipher.update(payload, in); // TODO: Reads too much from buffer.
