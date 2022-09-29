@@ -6,6 +6,8 @@ package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 
@@ -68,11 +70,11 @@ public class IpmiRAKPMessage1 extends AbstractTaggedIpmiPayload {
             return UnsignedBytes.checkedCast(getBits().getByteValue());
         }
     }
-    private int systemSessionId;
-    private byte[] consoleRandom;   // length = 16
-    private RequestedMaximumPrivilegeLevel requestedMaximumPrivilegeLevel = RequestedMaximumPrivilegeLevel.ADMINISTRATOR;
-    private PrivilegeLookupMode privilegeLookupMode = PrivilegeLookupMode.USERNAME_PRIVILEGE;
-    private String username;
+    public int systemSessionId;
+    public byte[] consoleRandom;   // length = 16
+    public RequestedMaximumPrivilegeLevel requestedMaximumPrivilegeLevel = RequestedMaximumPrivilegeLevel.ADMINISTRATOR;
+    public PrivilegeLookupMode privilegeLookupMode = PrivilegeLookupMode.USERNAME_PRIVILEGE;
+    public String username;
 
     public IpmiRAKPMessage1() {
     }
@@ -82,6 +84,7 @@ public class IpmiRAKPMessage1 extends AbstractTaggedIpmiPayload {
         byte[] tmp = new byte[16];
         IpmiUtils.RANDOM.nextBytes(tmp);
         this.consoleRandom = tmp;
+        this.username = session.getUsername();
     }
 
     @Override
@@ -127,7 +130,7 @@ public class IpmiRAKPMessage1 extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         messageTag = buffer.get();
         assertWireBytesZero(buffer, 3);
         systemSessionId = fromWireIntLE(buffer);

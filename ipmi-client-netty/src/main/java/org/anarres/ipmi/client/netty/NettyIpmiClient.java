@@ -22,13 +22,12 @@ import org.anarres.ipmi.protocol.packet.common.Packet;
  * @author shevek
  */
 public class NettyIpmiClient extends IpmiClient {
-
     private Channel channel;
     private final IpmiPipelineInitializer.SharedHandlers sharedHandlers;
     private IpmiChannelType channelType = IpmiChannelType.NIO;
 
     public NettyIpmiClient() {
-        this.sharedHandlers = new IpmiPipelineInitializer.SharedHandlers(new IpmiPacketContext());
+        this.sharedHandlers = new IpmiPipelineInitializer.SharedHandlers(this);
     }
 
     public void setDebug(boolean debug) {

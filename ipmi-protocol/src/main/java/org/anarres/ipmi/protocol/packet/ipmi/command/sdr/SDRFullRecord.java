@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.ipmi.command.sdr;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
@@ -108,7 +109,7 @@ public class SDRFullRecord extends SDRHeader {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

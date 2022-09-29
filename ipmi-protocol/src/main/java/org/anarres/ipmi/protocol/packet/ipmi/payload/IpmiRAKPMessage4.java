@@ -5,6 +5,8 @@
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.asf.AsfRsspSessionStatus;
@@ -20,9 +22,9 @@ import org.anarres.ipmi.protocol.client.IpmiEndpoint;
  */
 public class IpmiRAKPMessage4 extends AbstractTaggedIpmiPayload {
 
-    private AsfRsspSessionStatus statusCode;
+    public AsfRsspSessionStatus statusCode;
     public int consoleSessionId;
-    private byte[] integrityCheckValue;
+    public byte[] integrityCheckValue;
 
     @Override
     public IpmiPayloadType getPayloadType() {
@@ -59,7 +61,7 @@ public class IpmiRAKPMessage4 extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         messageTag = buffer.get();
         statusCode = Code.fromBuffer(AsfRsspSessionStatus.class, buffer);
         assertWireBytesZero(buffer, 2);

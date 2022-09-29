@@ -1,5 +1,6 @@
 package org.anarres.ipmi.protocol.packet.rmcp;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
@@ -47,8 +48,8 @@ public class RmcpPacket extends AbstractPacket {
     }
 
     @Override
-    protected final void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
-        fromWireRaw(context, buffer);
+    protected final void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
+        fromWireRaw(address, context, buffer);
         // There may or may not be one additional byte here.
     }
 

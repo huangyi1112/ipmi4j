@@ -8,6 +8,8 @@ import com.google.common.primitives.UnsignedBytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.logging.LoggingHandler;
+
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.packet.ipmi.Ipmi15SessionWrapper;
@@ -38,7 +40,7 @@ public class IpmiCommandTest {
         }
     }
     private final Formatter formatter = new Formatter();
-    private final IpmiPacketContext context = new IpmiPacketContext();
+    private final IpmiPacketContext context = new IpmiPacketContext() {};
 
     @Nonnull
     private static byte[] toByteArray(@Nonnull int... ints) {
@@ -73,7 +75,7 @@ public class IpmiCommandTest {
 
         buf = ByteBuffer.wrap(expect);
         packet = new RmcpPacket();
-        packet.fromWire(context, buf);
+        packet.fromWire(new InetSocketAddress("localhost", 623), context, buf);
         LOG.info("Packet is\n" + packet);
     }
 }

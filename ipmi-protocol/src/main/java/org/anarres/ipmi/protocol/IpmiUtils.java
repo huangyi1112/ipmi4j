@@ -50,8 +50,5 @@ public class IpmiUtils {
 
         System.out.println(new ClassWrapper<String>() {}.getClassName());
         System.out.println(IpmiUtils.<Map>getClassName());
-
-        IpmiPacketContext context = new IpmiPacketContext();
-        context.set("test", new Boolean(true));
     }
 }

@@ -5,6 +5,8 @@
 package org.anarres.ipmi.protocol.packet.ipmi;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -75,6 +77,9 @@ public abstract class AbstractIpmiSessionWrapper extends AbstractWireable implem
                 throw new UnsupportedOperationException("Unsupported payload type " + payloadType);
         }
     }
+
+    // end point ... to send to or receive from
+    private SocketAddress address;
     private int ipmiSessionId;
     private int ipmiSessionSequenceNumber;
     private IpmiPayload ipmiPayload;
@@ -82,6 +87,15 @@ public abstract class AbstractIpmiSessionWrapper extends AbstractWireable implem
     @Override
     public RmcpMessageClass getMessageClass() {
         return RmcpMessageClass.IPMI;
+    }
+
+    @Override
+    public SocketAddress getSocketAddress() {
+        return address;
+    }
+
+    public void setSocketAddress(SocketAddress address) {
+        this.address = address;
     }
 
     @Override

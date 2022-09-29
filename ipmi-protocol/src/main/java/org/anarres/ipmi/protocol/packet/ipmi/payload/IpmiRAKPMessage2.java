@@ -5,10 +5,15 @@
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.asf.AsfRsspSessionStatus;
+import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
@@ -21,11 +26,11 @@ import org.anarres.ipmi.protocol.client.IpmiEndpoint;
  */
 public class IpmiRAKPMessage2 extends AbstractTaggedIpmiPayload {
 
-    private AsfRsspSessionStatus statusCode;
+    public AsfRsspSessionStatus statusCode;
     public int consoleSessionId;
-    private byte[] systemRandom;   // length = 16
-    private UUID systemGuid;
-    private byte[] keyExchangeAuthenticationCode;
+    public byte[] systemRandom;   // length = 16
+    public UUID systemGuid;
+    public byte[] keyExchangeAuthenticationCode;
 
     @Override
     public IpmiPayloadType getPayloadType() {
@@ -64,7 +69,7 @@ public class IpmiRAKPMessage2 extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         messageTag = buffer.get();
         statusCode = Code.fromBuffer(AsfRsspSessionStatus.class, buffer);
         assertWireBytesZero(buffer, 2);
@@ -85,5 +90,90 @@ public class IpmiRAKPMessage2 extends AbstractTaggedIpmiPayload {
         appendValue(buf, depth, "SystemRandom", toHexString(systemRandom));
         appendValue(buf, depth, "SystemGUID", systemGuid);
         appendValue(buf, depth, "KeyExchangeAuthenticationCode", toHexString(keyExchangeAuthenticationCode));
+    }
+
+    /**
+     * Create the Little Endian byte array for verification purpose
+     *
+     * Note: Java ByteBuffer by default is BigEndian ...
+     */
+    public ByteBuffer getPairedAuthData(IpmiRAKPMessage1 rakp) {
+        int length = 58;
+        if (rakp.username != null) {
+            length += rakp.username.length();
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(length);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);   // set to LITTLE ENDIAN
+
+        buffer.putInt(consoleSessionId);
+        buffer.putInt(rakp.systemSessionId);
+        buffer.put(rakp.consoleRandom);
+        buffer.put(systemRandom);
+        toWireUUIDLE(buffer, systemGuid);
+        buffer.put(Bits.toByte(rakp.requestedMaximumPrivilegeLevel, rakp.privilegeLookupMode));
+
+        if(rakp.username != null) {
+            buffer.put((byte)rakp.username.length());
+            buffer.put(rakp.username.getBytes(StandardCharsets.UTF_8));
+        }
+        else {
+            buffer.put((byte)0);
+        }
+
+        buffer.flip();
+
+        return buffer;
+    }
+
+    public ByteBuffer generateKeyExchangeAuthCode(IpmiRAKPMessage1 rakp1) {
+        int length = 22;
+        if (rakp1.username != null) {
+            length += rakp1.username.length();
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(length);
+
+        // LITTLE ENDIAN!!!
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+        buffer.put(systemRandom);
+        buffer.putInt(consoleSessionId);
+        buffer.put(Bits.toByte(rakp1.requestedMaximumPrivilegeLevel, rakp1.privilegeLookupMode));
+
+        if (rakp1.username != null) {
+            buffer.put((byte)rakp1.username.length());
+            buffer.put(rakp1.username.getBytes(StandardCharsets.UTF_8));
+        } else {
+            buffer.put((byte)0);
+        }
+
+        buffer.flip();
+        return buffer;
+    }
+
+    public ByteBuffer prepareSIKData(IpmiRAKPMessage1 rakp1) {
+        int length = 34;
+        if (rakp1.username != null) {
+            length += rakp1.username.length();
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(length);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);  // make LE!!!
+
+        buffer.put(rakp1.consoleRandom);
+        buffer.put(systemRandom);
+        buffer.put(Bits.toByte(rakp1.requestedMaximumPrivilegeLevel, rakp1.privilegeLookupMode));
+
+        if (rakp1.username != null) {
+            buffer.put((byte)rakp1.username.length());
+            buffer.put(rakp1.username.getBytes(StandardCharsets.UTF_8));
+        } else {
+            buffer.put((byte)0);
+        }
+
+        buffer.flip();
+
+        return buffer;
     }
 }

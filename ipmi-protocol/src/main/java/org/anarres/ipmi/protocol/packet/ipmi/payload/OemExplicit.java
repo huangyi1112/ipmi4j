@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
@@ -57,7 +58,7 @@ public class OemExplicit extends AbstractIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         data = new byte[buffer.remaining()];
         buffer.get(data);
     }

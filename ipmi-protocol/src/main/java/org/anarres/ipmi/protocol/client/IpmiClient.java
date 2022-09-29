@@ -11,6 +11,7 @@ import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
@@ -33,7 +34,7 @@ import javax.annotation.Nonnull;
  *
  * @author shevek
  */
-public abstract class IpmiClient {
+public abstract class IpmiClient implements IpmiPacketContext {
     private static final Logger LOG = LoggerFactory.getLogger(IpmiClient.class);
     private final Map<SocketAddress, IpmiEndpoint> endpoints = new ConcurrentHashMap<>();
 
@@ -95,6 +96,16 @@ public abstract class IpmiClient {
      */
     public IpmiEndpoint getEndpoint(SocketAddress addr) {
         return endpoints.computeIfAbsent(addr, __ -> new IpmiEndpoint(this, addr));
+    }
+
+    @Override
+    public IpmiSession getIpmiSession(SocketAddress address, int sessionId) {
+        IpmiEndpoint endpoint = endpoints.get(address);
+        if(endpoint == null) {
+            return null;
+        }
+
+        return endpoint.getSession(sessionId);
     }
 
     @VisibleForTesting

@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.rmcp;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
 import org.anarres.ipmi.protocol.packet.common.AbstractPacket;
@@ -40,7 +41,7 @@ public class OEMRmcpMessage extends AbstractWireable implements RmcpData {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         data = readBytes(buffer, buffer.remaining());
     }
 }

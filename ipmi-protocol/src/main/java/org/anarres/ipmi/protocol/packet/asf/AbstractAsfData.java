@@ -5,6 +5,8 @@
 package org.anarres.ipmi.protocol.packet.asf;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -84,7 +86,7 @@ public abstract class AbstractAsfData extends AbstractWireable implements AsfRmc
     protected abstract void toWireData(@Nonnull ByteBuffer buffer);
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         assertWireInt(buffer, IANA_ENTERPRISE_NUMBER.getNumber(), "IANA enterprise number");
         assertWireByte(buffer, getMessageType().getCode(), "message type code");
         setMessageTag(buffer.get());

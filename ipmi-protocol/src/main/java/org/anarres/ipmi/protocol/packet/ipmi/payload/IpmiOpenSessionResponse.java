@@ -5,6 +5,8 @@
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.asf.AsfRsspSessionStatus;
@@ -28,13 +30,13 @@ import org.slf4j.LoggerFactory;
 public class IpmiOpenSessionResponse extends AbstractTaggedIpmiPayload {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpmiOpenSessionResponse.class);
-    private AsfRsspSessionStatus statusCode;
-    private RequestedMaximumPrivilegeLevel requestedMaximumPrivilegeLevel;
+    public AsfRsspSessionStatus statusCode;
+    public RequestedMaximumPrivilegeLevel requestedMaximumPrivilegeLevel;
     public int consoleSessionId;
     public int systemSessionId;
-    private IpmiAuthenticationAlgorithm authenticationAlgorithm;
-    private IpmiIntegrityAlgorithm integrityAlgorithm;
-    private IpmiConfidentialityAlgorithm confidentialityAlgorithm;
+    public IpmiAuthenticationAlgorithm authenticationAlgorithm;
+    public IpmiIntegrityAlgorithm integrityAlgorithm;
+    public IpmiConfidentialityAlgorithm confidentialityAlgorithm;
 
     @Override
     public IpmiPayloadType getPayloadType() {
@@ -75,7 +77,7 @@ public class IpmiOpenSessionResponse extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         messageTag = buffer.get();
         statusCode = Code.fromBuffer(AsfRsspSessionStatus.class, buffer);
         byte requestedMaximumPrivilegeLevelByte = buffer.get();

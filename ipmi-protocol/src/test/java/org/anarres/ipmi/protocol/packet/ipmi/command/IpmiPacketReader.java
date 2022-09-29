@@ -94,7 +94,7 @@ public class IpmiPacketReader extends AbstractIterator<RmcpPacket> implements Cl
                 rmcp.withRemoteAddress(targetSocketAddress);
             else
                 LOG.warn("No RMCP port in " + sourceSocketAddress + " -> " + targetSocketAddress);
-            rmcp.fromWire(context, ByteBuffer.wrap(data));
+            rmcp.fromWire(rmcp.getRemoteAddress(), context, ByteBuffer.wrap(data));
             processRmcp(rmcp);
 
             return rmcp;

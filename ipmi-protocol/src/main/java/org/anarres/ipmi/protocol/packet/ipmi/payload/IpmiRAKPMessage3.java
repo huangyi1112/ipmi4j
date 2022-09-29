@@ -5,9 +5,15 @@
 package org.anarres.ipmi.protocol.packet.ipmi.payload;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.packet.asf.AsfRsspSessionStatus;
+import org.anarres.ipmi.protocol.packet.common.Bits;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
@@ -19,10 +25,9 @@ import org.anarres.ipmi.protocol.client.IpmiEndpoint;
  * @author shevek
  */
 public class IpmiRAKPMessage3 extends AbstractTaggedIpmiPayload {
-
-    private AsfRsspSessionStatus statusCode;
-    private int systemSessionId;
-    private byte[] keyExchangeAuthenticationCode;
+    public AsfRsspSessionStatus statusCode;
+    public int systemSessionId;
+    public byte[] keyExchangeAuthenticationCode;
 
     @Override
     public IpmiPayloadType getPayloadType() {
@@ -59,7 +64,7 @@ public class IpmiRAKPMessage3 extends AbstractTaggedIpmiPayload {
     }
 
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         messageTag = buffer.get();
         statusCode = Code.fromBuffer(AsfRsspSessionStatus.class, buffer);
         assertWireBytesZero(buffer, 2);

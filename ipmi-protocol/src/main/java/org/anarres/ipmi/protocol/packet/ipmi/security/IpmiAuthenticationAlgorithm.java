@@ -6,6 +6,7 @@ package org.anarres.ipmi.protocol.packet.ipmi.security;
 
 import com.google.common.primitives.UnsignedBytes;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -25,26 +26,26 @@ public enum IpmiAuthenticationAlgorithm implements IpmiAlgorithm {
 
     RAKP_NONE(0x00, 0, IpmiIntegrityAlgorithm.NONE) {
         @Override
-        protected Hash newImplementation() throws NoSuchAlgorithmException {
+        protected Hash newImplementation(String key) throws NoSuchAlgorithmException, InvalidKeyException {
             return new None();
         }
     },
     RAKP_HMAC_SHA1(0x01, 20, IpmiIntegrityAlgorithm.HMAC_SHA1_96) {
         @Override
-        protected Hash newImplementation() throws NoSuchAlgorithmException {
-            return new RAKP_HMAC_SHA1();
+        protected Hash newImplementation(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+            return new RAKP_HMAC_SHA1(key);
         }
     },
     RAKP_HMAC_MD5(0x02, 16, IpmiIntegrityAlgorithm.HMAC_MD5_128) {
         @Override
-        protected Hash newImplementation() throws NoSuchAlgorithmException {
-            return new RAKP_HMAC_MD5();
+        protected Hash newImplementation(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+            return new RAKP_HMAC_MD5(key);
         }
     },
     RAKP_HMAC_SHA256(0x03, 32, IpmiIntegrityAlgorithm.HMAC_SHA256_128) {
         @Override
-        protected Hash newImplementation() throws NoSuchAlgorithmException {
-            return new RAKP_HMAC_SHA256();
+        protected Hash newImplementation(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+            return new RAKP_HMAC_SHA256(key);
         }
     };
     public static final byte PAYLOAD_TYPE = 0;
@@ -80,11 +81,11 @@ public enum IpmiAuthenticationAlgorithm implements IpmiAlgorithm {
     }
 
     @Nonnull
-    protected abstract Hash newImplementation() throws NoSuchAlgorithmException;
+    protected abstract Hash newImplementation(String key) throws NoSuchAlgorithmException, InvalidKeyException;
 
     @Nonnull
-    public byte[] hash(@Nonnull ByteBuffer input) throws NoSuchAlgorithmException {
-        Hash hash = newImplementation();
+    public byte[] hash(String key, @Nonnull ByteBuffer input) throws NoSuchAlgorithmException, InvalidKeyException {
+        Hash hash = newImplementation(key);
         hash.update(input);
         return hash.doFinal();
     }

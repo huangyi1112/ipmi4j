@@ -6,8 +6,11 @@ package org.anarres.ipmi.protocol.packet.ipmi;
 
 import javax.annotation.Nonnull;
 
+import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
 import org.anarres.ipmi.protocol.packet.rmcp.Encapsulation;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
+
+import java.net.SocketAddress;
 
 /**
  * [IPMI2] Section 13.6, page 132, table 13-8.
@@ -15,6 +18,9 @@ import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
  * @author shevek
  */
 public interface IpmiSessionWrapper extends RmcpData, Encapsulation {
+    public SocketAddress getSocketAddress();
+
+    public void setSocketAddress(SocketAddress address);
 
     public int getIpmiSessionId();
 
@@ -24,9 +30,9 @@ public interface IpmiSessionWrapper extends RmcpData, Encapsulation {
 
     public void setIpmiSessionSequenceNumber(int ipmiSessionSequenceNumber);
 
-    public org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload getIpmiPayload();
+    public IpmiPayload getIpmiPayload();
 
-    public void setIpmiPayload(@Nonnull org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload ipmiPayload);
+    public void setIpmiPayload(@Nonnull IpmiPayload ipmiPayload);
 
     public boolean isEncrypted();
 

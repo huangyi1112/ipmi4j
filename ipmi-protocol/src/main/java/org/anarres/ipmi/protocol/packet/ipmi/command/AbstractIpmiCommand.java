@@ -8,6 +8,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -159,7 +161,7 @@ public abstract class AbstractIpmiCommand extends AbstractIpmiPayload implements
      * @see AbstractIpmiSessionWrapper#newPayload(ByteBuffer, IpmiPayloadType)
      */
     @Override
-    protected void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         int chk1Start = buffer.position();
         int tmp;
         targetAddress = buffer.get();

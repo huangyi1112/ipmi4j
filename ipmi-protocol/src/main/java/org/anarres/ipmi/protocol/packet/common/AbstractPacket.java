@@ -151,7 +151,7 @@ public abstract class AbstractPacket extends AbstractWireable implements Packet 
         return getMessageClass();
     }
 
-    protected void fromWireRaw(@Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer) {
+    protected void fromWireRaw(SocketAddress address, @Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer) {
         RmcpMessageClass messageClass = fromWireHeader(buffer);
         RmcpData data;
 
@@ -182,7 +182,7 @@ public abstract class AbstractPacket extends AbstractWireable implements Packet 
 
         // LOG.info("Buffer position pre-data is " + buffer.position());
         withData(data);
-        data.fromWire(context, buffer);
+        data.fromWire(address, context, buffer);
     }
 
     @Override

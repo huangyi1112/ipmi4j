@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.ipmi.security.impl.integrity;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import javax.annotation.Nonnull;
@@ -14,8 +15,8 @@ import javax.annotation.Nonnull;
  */
 public abstract class AbstractJCEMAC extends AbstractJCEGenericMAC implements MAC {
 
-    public AbstractJCEMAC(@Nonnull String algorithm) throws NoSuchAlgorithmException {
-        super(algorithm);
+    public AbstractJCEMAC(@Nonnull String algorithm, String key) throws NoSuchAlgorithmException, InvalidKeyException {
+        super(algorithm, key);
     }
 
     @Override

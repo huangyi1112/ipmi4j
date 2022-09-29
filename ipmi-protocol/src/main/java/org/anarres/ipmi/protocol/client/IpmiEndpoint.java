@@ -5,6 +5,10 @@
 package org.anarres.ipmi.protocol.client;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nonnull;
@@ -14,12 +18,16 @@ import org.anarres.ipmi.protocol.client.dispatch.RequestKey;
 import org.anarres.ipmi.protocol.client.dispatch.ResponseProcessor;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
 import org.anarres.ipmi.protocol.packet.asf.AbstractAsfData;
-import org.anarres.ipmi.protocol.packet.ipmi.Ipmi15SessionWrapper;
-import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
+import org.anarres.ipmi.protocol.packet.asf.AsfPresencePingData;
+import org.anarres.ipmi.protocol.packet.asf.AsfPresencePongData;
+import org.anarres.ipmi.protocol.packet.ipmi.*;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiRequest;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiResponse;
+import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesRequest;
+import org.anarres.ipmi.protocol.packet.ipmi.command.messaging.GetChannelAuthenticationCapabilitiesResponse;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.AbstractTaggedIpmiPayload;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
+import org.anarres.ipmi.protocol.packet.ipmi.security.CipherSuite;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpData;
 import org.anarres.ipmi.protocol.packet.rmcp.RmcpPacket;
 import org.slf4j.Logger;
@@ -38,32 +46,67 @@ public class IpmiEndpoint implements ResponseProcessor {
     private final IpmiClient client;
     private final SocketAddress systemAddress;
     private final RequestQueue queue = new RequestQueue();
+
+    // allocated consoles
+    private final Set<Integer> consoles = new HashSet<>();
+
+    // active sessions, i.e. sessions successfully opened
     private final ConcurrentMap<Integer, IpmiSession> sessions = new ConcurrentHashMap<>();
+
+    // pendign reuqests, timeout handling!
     private final ConcurrentMap<RequestKey, RequestContext> pending = new ConcurrentHashMap<>();
+
+    private boolean supportIPMIv2 = false;
+    private final List<CipherSuite> cipherSuits = new ArrayList<>();
 
     public IpmiEndpoint(@Nonnull IpmiClient client, @Nonnull SocketAddress systemAddress) {
         this.client = client;
         this.systemAddress = systemAddress;
     }
 
-    @Nonnull
-    public IpmiSession newSession() {
-        for (;;) {
-            int id = IpmiUtils.RANDOM.nextInt();
-            if (id == 0)
-                continue;
-            IpmiSession session = new IpmiSession(this, id);
-            if (sessions.putIfAbsent(id, session) == null)
-                return session;
-        }
+    public boolean isIPMIv2Supported() {
+        return supportIPMIv2;
     }
 
-    public IpmiSession getSession(int id) {
-        if (id == 0) {
+    public List<CipherSuite> getCipherSuits() {
+        return cipherSuits;
+    }
+
+    /**
+     * To make our session more recognizable, we create session by fixing higher 16 bits as FEFC,
+     * with lower 16 bits randomly generated
+     * @return
+     */
+    @Nonnull
+    public IpmiSession newSession(String username, String password) throws Exception {
+        int id = IpmiUtils.RANDOM.nextInt();
+        int sessionId = 0xFEFC0000 | (id & 0xFFFF);
+
+        synchronized (consoles) {
+            while(consoles.contains(sessionId)) {
+                id = IpmiUtils.RANDOM.nextInt();
+                sessionId = 0xFEFC0000 | (id & 0xFFFF);
+            }
+
+            consoles.add(sessionId);
+        }
+
+        IpmiSession session = new IpmiSession(this, sessionId);
+        if(!session.open("ADMIN", "ADMIN")) {
+            System.out.println("Cannot create session");
+        }
+
+        sessions.put(session.getSystemSessionId(), session);
+
+        return session;
+    }
+
+    public IpmiSession getSession(int sessionId) {
+        if (sessionId == 0) {
             return null;
         }
 
-        return sessions.get(id);
+        return sessions.get(sessionId);
     }
 
     @Nonnull
@@ -152,8 +195,18 @@ public class IpmiEndpoint implements ResponseProcessor {
         pending.put(key, context);
         LOG.info("Queue IPMI request with key: " + key);
 
-        IpmiSessionWrapper wrapper = new Ipmi15SessionWrapper();
+        IpmiSessionWrapper wrapper;
+        if(supportIPMIv2) {
+            wrapper =new Ipmi20SessionWrapper();
+        }
+        else {
+            wrapper = new Ipmi15SessionWrapper();
+        }
+
+        wrapper.setSocketAddress(getSystemAddress());
+        wrapper.setIpmiSessionId(session == null ? 0 : session.getSystemSessionId());
         wrapper.setIpmiPayload(payload);
+
         if (session != null) {
             if (wrapper.isEncrypted())
                 wrapper.setIpmiSessionSequenceNumber(session.nextEncryptedSequenceNumber());
@@ -169,20 +222,27 @@ public class IpmiEndpoint implements ResponseProcessor {
 
         client.send(packet);
 
+        if(supportIPMIv2) {
+            LOG.info("Send IPMI request with v2 wrapper: " + payload);
+        }
+        else {
+            LOG.info("Send IPMI request with v1.5 wrapper: " + payload);
+        }
+
         return new RequestFuture<T>(context);
     }
 
     private void _receive(RequestKey key, Object response) {
         LOG.info("Receive response for request key: " + key);
 
-        RequestContext context = pending.get(key);
+        RequestContext context = pending.remove(key);
         if(context == null) {
             LOG.info("Got unexpected response payload - " + response);
         }
         else {
+            LOG.info("Got response payload - " + response);
             context.response = response;
             context.done(REQ_SUCC);
-            LOG.info("Got response payload - " + response);
         }
     }
 
@@ -214,6 +274,82 @@ public class IpmiEndpoint implements ResponseProcessor {
     public void timeout(@Nonnull RequestKey key) {
         RequestContext context = pending.get(key);
         context.done(REQ_EXPR);
+    }
+
+    //
+    // make tests to understand the capability of the target
+    public boolean contact() {
+        try {
+            Future<AsfPresencePongData> pongFuture = sendAsfRequest(new AsfPresencePingData());
+            AsfPresencePongData pong = pongFuture.get();
+            if(pong.getSupportedEntities().contains(AsfPresencePongData.SupportedEntity.IPMI_SUPPORTED)) {
+                System.out.println("IPMI Supported");
+            }
+
+            if(pong.getSupportedEntities().contains(AsfPresencePongData.SupportedEntity.SUPPORT_ASF_V1)) {
+                System.out.println("Support ASF v1");
+            }
+
+            // Now get capabilities. We are monitoring, so always get User privilege only
+            GetChannelAuthenticationCapabilitiesRequest request = new GetChannelAuthenticationCapabilitiesRequest();
+            request.extendedCapabilities = true;
+            request.channelPrivilegeLevel = IpmiChannelPrivilegeLevel.User;
+
+            Future<GetChannelAuthenticationCapabilitiesResponse> future = sendIpmiRequest(null, request);
+            GetChannelAuthenticationCapabilitiesResponse resp = future.get();
+
+            System.out.println("Supported auth types: " + resp.authenticationTypes);
+
+
+            if(resp.extendedCapabilities.contains(GetChannelAuthenticationCapabilitiesResponse.ExtendedCapabilities.IPMI15_CONNECTIONS_SUPPORTED)) {
+                System.out.println("IPMIv1.5 supported");
+            }
+
+            if(resp.extendedCapabilities.contains(GetChannelAuthenticationCapabilitiesResponse.ExtendedCapabilities.IPMI20_CONNECTIONS_SUPPORTED)) {
+                System.out.println("IPMIv2.0 supported");
+                supportIPMIv2 = true;
+            }
+
+            // now cyphers, only for IPMI v2
+            /* TODO: not support or now
+            GetChannelCipherSuitesRequest cipherReq = new GetChannelCipherSuitesRequest();
+            cipherReq.channelNumber = IpmiChannelNumber.CURRENT;
+            cipherReq.payloadType = IpmiPayloadType.IPMI;
+            cipherReq.listType = GetChannelCipherSuitesRequest.ListType.Supported;
+
+            ByteBuffer buffer = ByteBuffer.allocate(GetChannelCipherSuitesRequest.MAX_LIST_INDEX * GetChannelCipherSuitesRequest.MAX_LIST_CYPHER_SUITES);
+            for(int i = 0; i < GetChannelCipherSuitesRequest.MAX_LIST_INDEX; i++) {
+                cipherReq.listIndex = 0;  // get first 16 suites
+                Future<GetChannelCipherSuitesResponse> cipherFuture = sendIpmiRequest(null, cipherReq);
+                GetChannelCipherSuitesResponse cipherResp = cipherFuture.get();
+
+                if(cipherResp.getDataLength() > GetChannelCipherSuitesRequest.MAX_LIST_CYPHER_SUITES) {
+                    throw new RuntimeException("Invalid CipherSuite response with too large response: " + cipherResp.getDataLength());
+                }
+
+                buffer.put(cipherResp.getDataBytes());  // write the returned bytes, which is packed records for ciphers
+                if(cipherResp.getDataLength() < GetChannelCipherSuitesRequest.MAX_LIST_CYPHER_SUITES) {
+                    break;
+                }
+            }
+
+            buffer.flip();
+
+            while(buffer.hasRemaining()) {
+                CipherSuite suite = CipherSuite.decode(buffer);
+                if(suite != null) {
+                    System.out.println("Decode one cipher suite - " + suite);
+                    cipherSuits.add(suite);
+                }
+            }
+            */
+            return true;
+        }
+        catch(Exception e) {
+            LOG.error("Cannot contact remote host", e);
+        }
+
+        return false;
     }
 
     private static final int REQ_PEND = 0;  // pending

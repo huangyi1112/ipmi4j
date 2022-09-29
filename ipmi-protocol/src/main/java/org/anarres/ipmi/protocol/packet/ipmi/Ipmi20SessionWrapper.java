@@ -7,6 +7,8 @@ package org.anarres.ipmi.protocol.packet.ipmi;
 import com.google.common.base.Throwables;
 import com.google.common.primitives.Chars;
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -87,7 +89,8 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     public int getWireLength(IpmiPacketContext context) {
         try {
             @CheckForNull
-            IpmiSession session = context.get(IpmiPacketContext.SESSION);
+            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId());
+            // IpmiSession session = context.get(IpmiPacketContext.SESSION);
 
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
@@ -122,15 +125,24 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     public void toWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
         try {
             @CheckForNull
-            IpmiSession session = context.get(IpmiPacketContext.SESSION);
-            // IpmiSession session = context.getIpmiSession(getIpmiSessionId());
+            // IpmiSession session = context.get(IpmiPacketContext.SESSION);
+            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId());
 
-            IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
-            IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
-            IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            // IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
+            // IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
+            // IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            IpmiConfidentialityAlgorithm confidentialityAlgorithm = IpmiConfidentialityAlgorithm.NONE;
+            IpmiAuthenticationAlgorithm authenticationAlgorithm = IpmiAuthenticationAlgorithm.RAKP_NONE;
+            IpmiIntegrityAlgorithm integrityAlgorithm = IpmiIntegrityAlgorithm.NONE;
 
-            boolean encrypted = !IpmiConfidentialityAlgorithm.NONE.equals(confidentialityAlgorithm);
-            boolean authenticated = !IpmiAuthenticationAlgorithm.RAKP_NONE.equals(authenticationAlgorithm);
+            if(session != null) {
+                confidentialityAlgorithm = session.getConfidentialityAlgorithm();
+                authenticationAlgorithm = session.getAuthenticationAlgorithm();
+                integrityAlgorithm = session.getIntegrityAlgorithm();
+            }
+
+            encrypted = !IpmiConfidentialityAlgorithm.NONE.equals(confidentialityAlgorithm);
+            authenticated = !IpmiAuthenticationAlgorithm.RAKP_NONE.equals(authenticationAlgorithm);
 
             IpmiPayload payload = getIpmiPayload();
 
@@ -187,7 +199,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     }
 
     @Override
-    public void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    public void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         try {
             AbstractWireable.assertWireByte(buffer, AUTHENTICATION_TYPE.getCode(), "IPMI session authentication type");
             byte payloadTypeByte = buffer.get();
@@ -195,12 +207,13 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             authenticated = AbstractIpmiCommand.getBit(payloadTypeByte, 6);
             IpmiPayloadType payloadType = Code.fromInt(IpmiPayloadType.class, payloadTypeByte & 0x3F);
 
+            setSocketAddress(address);
             int sessionId = fromWireIntLE(buffer);
             setIpmiSessionId(sessionId);
             setIpmiSessionSequenceNumber(fromWireIntLE(buffer));
 
-            IpmiSession session = context.get(IpmiPacketContext.SESSION);
-            // IpmiSession session = context.getIpmiSession(sessionId);
+            // IpmiSession session = context.get(IpmiPacketContext.SESSION);
+            IpmiSession session = context.getIpmiSession(address, sessionId);
             IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
@@ -221,7 +234,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
                         ? session.getConfidentialityAlgorithm().decrypt(session, encryptedBuffer)
                         : encryptedBuffer;
                 IpmiPayload payload = newPayload(unencryptedBuffer, payloadType);
-                payload.fromWire(context, unencryptedBuffer);
+                payload.fromWire(address, context, unencryptedBuffer);
                 setIpmiPayload(payload);
 
                 if (unencryptedBuffer.hasRemaining()) {

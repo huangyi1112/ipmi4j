@@ -17,7 +17,7 @@ public class IpmiPacketDecoderTest {
     // A trivial enough test suite to make Jenkins pass.
     @Test
     public void testSomeMethod() {
-        IpmiPacketContext context = new IpmiPacketContext();
+        IpmiPacketContext context = new IpmiPacketContext() {};
         IpmiPacketDecoder decoder = new IpmiPacketDecoder(context);
         assertNotNull(decoder);
     }

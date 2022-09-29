@@ -32,6 +32,14 @@ public class GetChannelCipherSuitesResponse extends AbstractIpmiResponse {
         handler.handleGetChannelCipherSuitesResponse(context, this);
     }
 
+    public int getDataLength() {
+        return dataBytes.length;
+    }
+
+    public byte[] getDataBytes() {
+        return dataBytes;
+    }
+
     @Override
     protected int getResponseDataWireLength() {
         return 2 + dataBytes.length;

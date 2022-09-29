@@ -1,5 +1,6 @@
 package org.anarres.ipmi.protocol.packet.rmcp;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnull;
 
@@ -84,12 +85,12 @@ public class RspRmcpPacket extends AbstractPacket {
     }
 
     @Override
-    protected final void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    protected final void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         int start = buffer.position();
         int sessionId = buffer.getInt();
         withSessionId(sessionId);
         withSessionSequenceNumber(buffer.getInt());
-        fromWireRaw(context, buffer);
+        fromWireRaw(address, context, buffer);
         if (sessionId != 0) {   // Page 24: Unsecured data.
             int length = buffer.position() - start;
             byte[] pad = IntegrityPad.PAD(length);

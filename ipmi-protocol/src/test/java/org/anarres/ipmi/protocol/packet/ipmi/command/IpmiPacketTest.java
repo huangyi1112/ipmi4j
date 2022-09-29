@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 public class IpmiPacketTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpmiPacketTest.class);
-    private final IpmiPacketContext context = new IpmiPacketContext();
+    private final IpmiPacketContext context = new IpmiPacketContext() {};
 
     @Before
     public void setUp() throws Exception {

@@ -9,6 +9,8 @@ import com.google.common.primitives.Chars;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 import javax.annotation.CheckForNull;
@@ -40,13 +42,13 @@ public abstract class AbstractWireable implements Wireable {
             throw new IllegalStateException("Object should serialize to " + expectedLength + " bytes, but generated " + actualLength + ": " + this);
     }
 
-    protected abstract void fromWireUnchecked(@Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer);
+    protected abstract void fromWireUnchecked(SocketAddress address, @Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer);
 
     @Override
-    public void fromWire(@Nonnull IpmiPacketContext context, ByteBuffer buffer) {
+    public void fromWire(SocketAddress address, @Nonnull IpmiPacketContext context, ByteBuffer buffer) {
         Preconditions.checkNotNull(buffer, "ByteBuffer was null.");
         int start = buffer.position();
-        fromWireUnchecked(context, buffer);
+        fromWireUnchecked(address, context, buffer);
 
         int expectedLength = getWireLength(context);
         int actualLength = buffer.position() - start;

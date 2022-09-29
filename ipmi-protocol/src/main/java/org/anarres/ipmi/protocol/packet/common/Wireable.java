@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.common;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -47,7 +48,7 @@ public interface Wireable {
 	 * @param context The IpmiPacketContext for this operation.
 	 * @param buffer The ByteBuffer from which this Wireable will be deserialized.
      */
-    public void fromWire(@Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer);
+    public void fromWire(SocketAddress address, @Nonnull IpmiPacketContext context, @Nonnull ByteBuffer buffer);
 
     public void toStringBuilder(@Nonnull StringBuilder buf, @Nonnegative int depth);
 }

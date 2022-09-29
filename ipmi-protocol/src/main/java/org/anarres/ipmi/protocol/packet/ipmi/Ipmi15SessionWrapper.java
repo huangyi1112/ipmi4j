@@ -5,6 +5,8 @@
 package org.anarres.ipmi.protocol.packet.ipmi;
 
 import com.google.common.primitives.UnsignedBytes;
+
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.packet.common.Code;
@@ -74,10 +76,11 @@ public class Ipmi15SessionWrapper extends AbstractIpmiSessionWrapper {
     }
 
     @Override
-    public void fromWireUnchecked(IpmiPacketContext context, ByteBuffer buffer) {
+    public void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         IpmiSessionAuthenticationType authenticationType = Code.fromBuffer(IpmiSessionAuthenticationType.class, buffer);
         setIpmiSessionSequenceNumber(buffer.getInt());
         setIpmiSessionId(buffer.getInt());
+        setSocketAddress(address);
 
         if (authenticationType != IpmiSessionAuthenticationType.NONE) {
             byte[] ipmiMessageAuthenticationCode = AbstractWireable.readBytes(buffer, 16);
@@ -89,7 +92,7 @@ public class Ipmi15SessionWrapper extends AbstractIpmiSessionWrapper {
         buffer.position(payloadBuffer.limit());
 
         IpmiPayload payload = newPayload(payloadBuffer, IpmiPayloadType.IPMI);
-        payload.fromWire(context, payloadBuffer);
+        payload.fromWire(address, context, payloadBuffer);
         setIpmiPayload(payload);
 
         // assert payloadLength == header.getWireLength() + payload.getWireLength();

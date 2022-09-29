@@ -19,9 +19,12 @@ import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayloadType;
  * @author shevek
  */
 public class GetChannelCipherSuitesRequest extends AbstractIpmiRequest {
+    // IPMI2: the highest bit is for list type, second to highest bit reserved, only lower 6 bits for list index.
+    public static final int MAX_LIST_INDEX = 0x40;
+    // each LIST request will return upto to 16 cyper IDs
+    public static final int MAX_LIST_CYPHER_SUITES = 0x10;
 
     public enum ListType {
-
         ByCipherSuite,
         Supported
     }

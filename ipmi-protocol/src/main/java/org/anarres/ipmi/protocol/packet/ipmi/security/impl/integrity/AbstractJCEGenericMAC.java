@@ -5,6 +5,7 @@
 package org.anarres.ipmi.protocol.packet.ipmi.security.impl.integrity;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import javax.annotation.Nonnull;
@@ -19,8 +20,11 @@ public abstract class AbstractJCEGenericMAC implements GenericMAC {
 
     private final Mac mac;
 
-    protected AbstractJCEGenericMAC(@Nonnull String algorithm) throws NoSuchAlgorithmException {
+    protected AbstractJCEGenericMAC(@Nonnull String algorithm, String key) throws NoSuchAlgorithmException, InvalidKeyException {
         mac = Mac.getInstance(algorithm);
+        if(key != null) {
+            init(key.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     @Nonnull

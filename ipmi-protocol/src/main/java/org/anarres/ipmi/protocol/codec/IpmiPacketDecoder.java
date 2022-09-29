@@ -40,7 +40,7 @@ public class IpmiPacketDecoder {
     public Packet decode(@Nonnull SocketAddress remoteAddress, @Nonnull ByteBuffer buf) {
         RmcpPacket packet = new RmcpPacket();
         packet.withRemoteAddress(remoteAddress);
-        packet.fromWire(context, buf);
+        packet.fromWire(remoteAddress, context, buf);
         if (buf.position() < buf.limit()) {
             LOG.warn("Discarded " + (buf.limit() - buf.position()) + " trailing bytes in RMCP packet: " + buf);
             buf.position(buf.limit());

@@ -4,6 +4,7 @@
  */
 package org.anarres.ipmi.protocol.packet.ipmi.security.impl.integrity;
 
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
 
@@ -14,8 +15,8 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
  */
 public class HMAC_SHA256_128 extends AbstractJCEMAC {
 
-    public HMAC_SHA256_128() throws NoSuchAlgorithmException {
-        super("HmacSHA256");
+    public HMAC_SHA256_128(String key) throws NoSuchAlgorithmException, InvalidKeyException {
+        super("HmacSHA256", key);
     }
 
     @Override
