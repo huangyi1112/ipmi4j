@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * TODO ...
  */
 public interface IpmiPacketContext {
-    default IpmiSession getIpmiSession(SocketAddress address, int sessionId) {
+    default IpmiSession getIpmiSession(SocketAddress address, int sessionId, boolean request) {
         return null;
     }
 }

@@ -14,6 +14,8 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.ShortBufferException;
+import javax.crypto.spec.IvParameterSpec;
+
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.packet.ipmi.security.impl.confidentiality.AES_CBC_128;
 import org.anarres.ipmi.protocol.packet.ipmi.security.impl.confidentiality.Cipher;
@@ -98,7 +100,22 @@ public enum IpmiConfidentialityAlgorithm implements IpmiAlgorithm {
 
         @Override
         public ByteBuffer decrypt(IpmiSession session, ByteBuffer in) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, ShortBufferException {
+            byte [] iv = new byte[16];
+            in.get(iv); // consume the iv part
 
+            byte[] key = session.getAdditionalKey2();
+            AES_CBC_128 cipher = new AES_CBC_128();
+            cipher.init(Cipher.Mode.DECRYPT, key, iv);
+
+            byte[] payload = new byte[in.remaining()];
+            ByteBuffer buffer = ByteBuffer.wrap(payload);
+            cipher.update(in, buffer);
+
+
+            int pad = payload[payload.length - 1];
+            return ByteBuffer.wrap(payload, 0, payload.length - pad -1);
+
+            /*
             int limit = in.limit() - 1;
             int padLength = UnsignedBytes.toInt(in.get(limit));
             in.limit(limit);
@@ -116,6 +133,7 @@ public enum IpmiConfidentialityAlgorithm implements IpmiAlgorithm {
 
             payload.flip();
             return payload;
+            */
         }
     },
     /** [IPMI2] Section 13.30, table 13-21, page 161. */

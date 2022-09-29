@@ -51,7 +51,8 @@ public class IpmiEndpoint implements ResponseProcessor {
     private final Set<Integer> consoles = new HashSet<>();
 
     // active sessions, i.e. sessions successfully opened
-    private final ConcurrentMap<Integer, IpmiSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Integer /*server systemSessionId */, IpmiSession> serverSessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Integer /*client consoleSessionId */, IpmiSession> clientSessions = new ConcurrentHashMap<>();
 
     // pendign reuqests, timeout handling!
     private final ConcurrentMap<RequestKey, RequestContext> pending = new ConcurrentHashMap<>();
@@ -80,33 +81,42 @@ public class IpmiEndpoint implements ResponseProcessor {
     @Nonnull
     public IpmiSession newSession(String username, String password) throws Exception {
         int id = IpmiUtils.RANDOM.nextInt();
-        int sessionId = 0xFEFC0000 | (id & 0xFFFF);
+        int consoleSessionId = 0xFEFC0000 | (id & 0xFFFF);
 
         synchronized (consoles) {
-            while(consoles.contains(sessionId)) {
+            while(consoles.contains(consoleSessionId)) {
                 id = IpmiUtils.RANDOM.nextInt();
-                sessionId = 0xFEFC0000 | (id & 0xFFFF);
+                consoleSessionId = 0xFEFC0000 | (id & 0xFFFF);
             }
 
-            consoles.add(sessionId);
+            consoles.add(consoleSessionId);
         }
 
-        IpmiSession session = new IpmiSession(this, sessionId);
+        LOG.info(String.format("Allocate session with console id %#08x",  consoleSessionId));
+
+        IpmiSession session = new IpmiSession(this, consoleSessionId);
         if(!session.open("ADMIN", "ADMIN")) {
             System.out.println("Cannot create session");
         }
 
-        sessions.put(session.getSystemSessionId(), session);
+        LOG.info(String.format("Session with console id %#08x opened with session id %#08x",  consoleSessionId, session.getSystemSessionId()));
+        serverSessions.put(session.getSystemSessionId(), session);
+        clientSessions.put(consoleSessionId, session);
 
         return session;
     }
 
-    public IpmiSession getSession(int sessionId) {
+    public IpmiSession getSessionById(int sessionId, boolean isRequest) {
         if (sessionId == 0) {
             return null;
         }
 
-        return sessions.get(sessionId);
+        if(isRequest) {
+            return serverSessions.get(sessionId);
+        }
+        else {
+            return clientSessions.get(sessionId);
+        }
     }
 
     @Nonnull

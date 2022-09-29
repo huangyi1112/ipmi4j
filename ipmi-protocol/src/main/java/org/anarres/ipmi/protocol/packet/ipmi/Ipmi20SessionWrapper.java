@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import org.anarres.ipmi.protocol.packet.common.AbstractWireable;
 import org.anarres.ipmi.protocol.packet.common.Code;
 import org.anarres.ipmi.protocol.packet.ipmi.command.AbstractIpmiCommand;
+import org.anarres.ipmi.protocol.packet.ipmi.command.AbstractIpmiRequest;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayload;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.IpmiPayloadType;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.OemExplicit;
@@ -89,11 +90,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     public int getWireLength(IpmiPacketContext context) {
         try {
             @CheckForNull
-            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId());
-            // IpmiSession session = context.get(IpmiPacketContext.SESSION);
-
-            // IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
-            // IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId(), (getIpmiPayload() instanceof AbstractIpmiRequest));
             IpmiConfidentialityAlgorithm confidentialityAlgorithm = IpmiConfidentialityAlgorithm.NONE;
             IpmiIntegrityAlgorithm integrityAlgorithm = IpmiIntegrityAlgorithm.NONE;
 
@@ -134,7 +131,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
         try {
             @CheckForNull
             // IpmiSession session = context.get(IpmiPacketContext.SESSION);
-            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId());
+            IpmiSession session = context.getIpmiSession(getSocketAddress(), getIpmiSessionId(), true);
 
             // IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
             // IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
@@ -215,6 +212,8 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
     @Override
     public void fromWireUnchecked(SocketAddress address, IpmiPacketContext context, ByteBuffer buffer) {
         try {
+            ByteBuffer integrityInput = buffer.duplicate();
+
             AbstractWireable.assertWireByte(buffer, AUTHENTICATION_TYPE.getCode(), "IPMI session authentication type");
             byte payloadTypeByte = buffer.get();
             encrypted = AbstractIpmiCommand.getBit(payloadTypeByte, 7);
@@ -226,13 +225,17 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             setIpmiSessionId(sessionId);
             setIpmiSessionSequenceNumber(fromWireIntLE(buffer));
 
-            // IpmiSession session = context.get(IpmiPacketContext.SESSION);
-            IpmiSession session = context.getIpmiSession(address, sessionId);
-            IpmiAuthenticationAlgorithm authenticationAlgorithm = getAuthenticationAlgorithm(session);
-            IpmiConfidentialityAlgorithm confidentialityAlgorithm = getConfidentialityAlgorithm(session);
-            IpmiIntegrityAlgorithm integrityAlgorithm = getIntegrityAlgorithm(session);
+            IpmiSession session = context.getIpmiSession(address, sessionId, false);
 
-            ByteBuffer integrityInput = buffer.duplicate();
+            IpmiConfidentialityAlgorithm confidentialityAlgorithm = IpmiConfidentialityAlgorithm.NONE;
+            IpmiAuthenticationAlgorithm authenticationAlgorithm = IpmiAuthenticationAlgorithm.RAKP_NONE;
+            IpmiIntegrityAlgorithm integrityAlgorithm = IpmiIntegrityAlgorithm.NONE;
+
+            if(session != null) {
+                confidentialityAlgorithm = session.getConfidentialityAlgorithm();
+                authenticationAlgorithm = session.getAuthenticationAlgorithm();
+                integrityAlgorithm = session.getIntegrityAlgorithm();
+            }
 
             // TODO: Before calling payload.fromWire(), make sure to set the position and limit on the buffer.
             int payloadLength = fromWireCharLE(buffer);
@@ -245,7 +248,7 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
             DECRYPT:
             {
                 ByteBuffer unencryptedBuffer = isEncrypted()
-                        ? session.getConfidentialityAlgorithm().decrypt(session, encryptedBuffer)
+                        ? confidentialityAlgorithm.decrypt(session, encryptedBuffer)
                         : encryptedBuffer;
                 IpmiPayload payload = newPayload(unencryptedBuffer, payloadType);
                 payload.fromWire(address, context, unencryptedBuffer);
@@ -259,17 +262,20 @@ public class Ipmi20SessionWrapper extends AbstractIpmiSessionWrapper {
 
             SIGN:
             if (!IpmiIntegrityAlgorithm.NONE.equals(integrityAlgorithm)) {
-                int integrityPadLength = IntegrityPad.PAD(payloadLength).length;
-                // LOG.info("IntegrityPad length is " + integrityPadLength);
-                byte[] integrityPad = AbstractWireable.readBytes(buffer, integrityPadLength);
-                // TODO: Assert integrityPad all 0xFF.
+                int integrityPadLength = IntegrityPad.PAD(integrityAlgorithm.getMacLength() + 1 + 1).length;
+                for(int i = 0; i < integrityPadLength; i++) {
+                    AbstractWireable.assertWireByte(buffer, (byte) 0xFF, "Padding byte");
+                }
 
                 AbstractWireable.assertWireByte(buffer, UnsignedBytes.checkedCast(integrityPadLength), "Integrity pad length");
                 AbstractWireable.assertWireByte(buffer, (byte) 0x07, "Next-header field");
 
                 integrityInput.limit(buffer.position());
+
                 byte[] integrityData = session.getIntegrityAlgorithm().sign(session, integrityInput);
-                // TODO: Assert integrityData equal to outstanding buffer data.
+                for(int i = 0; i < integrityData.length; i++) {
+                    AbstractWireable.assertWireByte(buffer, integrityData[i], "Integrity byte");
+                }
             }
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);

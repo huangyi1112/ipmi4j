@@ -29,7 +29,11 @@ import org.anarres.ipmi.protocol.packet.ipmi.security.IpmiIntegrityAlgorithm;
 import static org.anarres.ipmi.protocol.packet.ipmi.security.CipherSuite.*;
 
 /**
- *
+ * Server Client talk in session using two session IDs:
+ * 1. consoleSessionId: this is sent to server when send Session Open request and will be used by
+ *                      server to identify the session (filled in responses' session ID field)
+ * 2. systemSessionId: this is received as Session Open Response, and is used by client to identify
+ *                      session (fill in requests' session ID field)
  * @author shevek
  */
 public class IpmiSession {

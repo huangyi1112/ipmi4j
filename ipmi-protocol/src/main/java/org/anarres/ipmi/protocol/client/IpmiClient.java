@@ -15,8 +15,6 @@ import org.anarres.ipmi.protocol.client.session.IpmiPacketContext;
 import org.anarres.ipmi.protocol.client.session.IpmiSession;
 import org.anarres.ipmi.protocol.client.visitor.IpmiMessageProcessor;
 import org.anarres.ipmi.protocol.client.visitor.RmcpMessageHandler;
-import org.anarres.ipmi.protocol.packet.asf.AbstractAsfData;
-import org.anarres.ipmi.protocol.packet.asf.AsfRmcpData;
 import org.anarres.ipmi.protocol.packet.ipmi.IpmiSessionWrapper;
 import org.anarres.ipmi.protocol.packet.ipmi.command.IpmiCommand;
 import org.anarres.ipmi.protocol.packet.ipmi.payload.AbstractTaggedIpmiPayload;
@@ -72,7 +70,7 @@ public abstract class IpmiClient implements IpmiPacketContext {
         public void handleIpmiRmcpData(IpmiEndpoint context, IpmiSessionWrapper message, int rmcpSeq) {
             // Pass directly to IpmiPayload to avoid type ambiguity on 'this'.
             int sessionId = message.getIpmiSessionId();
-            IpmiSession session = (sessionId == 0) ? null : context.getSession(sessionId);
+            IpmiSession session = (sessionId == 0) ? null : context.getSessionById(sessionId, false);
             message.getIpmiPayload().apply(ipmiPayloadHandler, context, session);
         }
     };
@@ -99,13 +97,13 @@ public abstract class IpmiClient implements IpmiPacketContext {
     }
 
     @Override
-    public IpmiSession getIpmiSession(SocketAddress address, int sessionId) {
+    public IpmiSession getIpmiSession(SocketAddress address, int sessionId, boolean isRequest) {
         IpmiEndpoint endpoint = endpoints.get(address);
         if(endpoint == null) {
             return null;
         }
 
-        return endpoint.getSession(sessionId);
+        return endpoint.getSessionById(sessionId, isRequest);
     }
 
     @VisibleForTesting
