@@ -187,7 +187,7 @@ public abstract class AbstractIpmiCommand extends AbstractIpmiPayload implements
     private static byte toChecksum(@Nonnull ByteBuffer buffer, @Nonnegative int start) {
         int csum = 0;
         for (int i = start; i < buffer.position(); i++)
-            csum += buffer.get(i);
+           csum = (csum  + buffer.get(i) ) % 256;
         return (byte) -csum;
     }
 
