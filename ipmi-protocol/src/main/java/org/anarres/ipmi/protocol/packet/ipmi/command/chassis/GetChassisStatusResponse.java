@@ -109,7 +109,7 @@ public class GetChassisStatusResponse extends AbstractIpmiResponse {
 
     @Override
     protected int getResponseDataWireLength() {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -119,6 +119,7 @@ public class GetChassisStatusResponse extends AbstractIpmiResponse {
         buffer.put(Bits.toByte(currentPowerState));
         buffer.put(Bits.toByte(lastPowerEvent));
         buffer.put(Bits.toByte(miscChassisState));
+        buffer.get();
     }
 
     @Override
