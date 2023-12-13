@@ -303,7 +303,7 @@ public class IpmiEndpoint implements ResponseProcessor {
             // Now get capabilities. We are monitoring, so always get User privilege only
             GetChannelAuthenticationCapabilitiesRequest request = new GetChannelAuthenticationCapabilitiesRequest();
             request.extendedCapabilities = true;
-            request.channelPrivilegeLevel = IpmiChannelPrivilegeLevel.User;
+            request.channelPrivilegeLevel = IpmiChannelPrivilegeLevel.Administrator;
 
             Future<GetChannelAuthenticationCapabilitiesResponse> future = sendIpmiRequest(null, request);
             GetChannelAuthenticationCapabilitiesResponse resp = future.get();
