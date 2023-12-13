@@ -95,7 +95,7 @@ public class IpmiEndpoint implements ResponseProcessor {
         LOG.info(String.format("Allocate session with console id %#08x",  consoleSessionId));
 
         IpmiSession session = new IpmiSession(this, consoleSessionId);
-        if(!session.open("ADMIN", "ADMIN")) {
+        if(!session.open(username, password)) {
             System.out.println("Cannot create session");
         }
 
