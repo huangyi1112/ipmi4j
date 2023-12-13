@@ -171,7 +171,7 @@ public class IpmiSession {
                 continue;
             }
             */
-            IpmiOpenSessionRequest openReq = new IpmiOpenSessionRequest(this, RequestedMaximumPrivilegeLevel.USER);
+            IpmiOpenSessionRequest openReq = new IpmiOpenSessionRequest(this, RequestedMaximumPrivilegeLevel.ADMINISTRATOR);
             Future<IpmiOpenSessionResponse> openResFuture = endpoint.sendIpmiRequest(openReq);
             IpmiOpenSessionResponse openResp = openResFuture.get();
 
